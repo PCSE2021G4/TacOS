@@ -35,8 +35,8 @@
 #include <pm.hmm>
 #include <init.hmm>
 #else
-#include <shellProc.hmm>
-#include <mp3Proc.hmm>
+#include <allControlProc.hmm>
+#include <musicPlayProc.hmm>
 #include <spi.hmm>
 #endif
 

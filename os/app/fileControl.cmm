@@ -30,7 +30,7 @@
 #include <fs.hmm>
 #include <util.hmm>
 #include "appUtil.hmm"
-#include "mp3Files.hmm"
+#include "fileControl.hmm"
 
 //-----------------------------------------------------------------------------
 // MP3ファイルの一覧（ただし，最大５個）

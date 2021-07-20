@@ -29,11 +29,11 @@
  */
 #include <kernel.hmm>
 #include <util.hmm>
-#include "lcd.hmm"
-#include "mp3Proc.hmm"
+#include "display.hmm"
+#include "musicPlayProc.hmm"
 #include "spi.hmm"
-#include "mp3Files.hmm"
-#include "shellProc.hmm"
+#include "fileControl.hmm"
+#include "allControlProc.hmm"
 
 //-----------------------------------------------------------------------------
 // スイッチの読み取り
