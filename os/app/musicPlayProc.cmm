@@ -30,7 +30,7 @@
 #include <kernel.hmm>
 #include <fs.hmm>
 #include <util.hmm>
-#include "mp3Proc.hmm"
+#include "musicPlayProc.hmm"
 #include "spi.hmm"
 #define BUFSIZ 512                          // MP3 ファイル用のバッファ
 
