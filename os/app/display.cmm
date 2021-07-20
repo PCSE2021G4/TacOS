@@ -33,7 +33,7 @@
 
 #include "spi.hmm"
 #include "font.hmm"
-#include "lcd.hmm"
+#include "display.hmm"
 
 char[] locateCom = { '\xb0',   // page address
                      '\x10',   // column address Hi = 0x00
