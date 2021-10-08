@@ -126,3 +126,10 @@ public void shellMain() {
     sleep(10);                                      // 10ms に一度
   }
 }
+
+struct songInfo{
+	char[][] name;
+	int time;
+	int id;
+	char[] path;
+};
