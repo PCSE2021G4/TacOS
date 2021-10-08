@@ -80,3 +80,30 @@ public char[] mp3FilesGetPath(int n) {
   }
   return null;
 }
+
+
+//public SongInfo getSongInfo(int id){ //曲idから曲情報取得
+//}
+
+public void addPlaylist(int list, int id){ //プレイリストに追加
+}
+
+public void removePlaylist(int id){	//プレイリストから削除
+}
+
+public int[] getSongIdsArtist(int id){	//曲id一覧取得(アーティストidから)
+	return null;
+}
+
+public int[] getSongIdsAlbam(int id){	//曲id一覧取得(アルバムidから)
+	return null;
+}
+
+public char[][] getArtistNames(){	//アーティスト名一覧を取得
+	return null;
+}
+
+public char[][] getAlabamNames(){	//アルバム名一覧を取得
+	return null;
+}
+
