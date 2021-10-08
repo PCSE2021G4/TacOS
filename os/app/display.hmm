@@ -31,3 +31,10 @@ public void putCh(char c);                 // カーソル位置に１文字表�
 public void putStr(char[] str);            // カーソル位置に文字列表示
 public void putDec(int val, int width);    // カーソル位置に10進数表示
 public void cls();                         // 画面のクリア
+public void showLibrary();                 // ライブラリ画面の表示
+public void showList(char[] title, char[][] itemList); // 項目一覧の表示
+//public void showPlay(SongInfo songInfo);   // 再生画面の表示
+public void showMenu();                    // メニュー画面の表示
+public void showSleepTimer();              // スリープ画面の表示
+public void setChoice(int choice);         // カーソル位置の更新
+public void setSeekBar(int time);          // シークバーの更新

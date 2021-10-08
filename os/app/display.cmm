@@ -90,3 +90,32 @@ public void cls() {
     }
   }
 }
+
+//--------add code --------
+public void showLibrary(){
+
+}
+
+public void showList(char[] title, char[][] itemList){
+
+}
+/*
+public void showPlay(SongInfo songInfo){
+
+}
+*/
+public void showMenu(){
+
+}
+
+public void showSleepTimer(){
+
+}
+
+public void setChoice(int choice){
+
+}
+
+public void setSeekBar(int time){
+
+}
