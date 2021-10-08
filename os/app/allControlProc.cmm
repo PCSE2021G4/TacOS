@@ -80,9 +80,49 @@ int swToNum(int sw) {
 //-----------------------------------------------------------------------------
 // 画面表示
 //-----------------------------------------------------------------------------
+
 void demoScreen() {
   cls();                                            // LCDをクリアする
-  locateXY(0,0); putStr("Tanaka Yoshihide Number1");
+  locateXY(0,0); putStr("Main Screen");
+  locateXY(2,2);
+  putStr("1:Playlist");
+  locateXY(2,3);
+  putStr("2:Album");
+  locateXY(2,4);
+  putStr("3:Artist");
+  locateXY(2,5);
+  putStr("4:All Song");
+}
+
+void playlist() {
+  cls();
+  locateXY(0,0); putStr("Playlist");
+}
+
+void album() {
+  cls();
+  locateXY(0,0); putStr("Album");
+}
+
+void artist() {
+  cls();
+  locateXY(0,0); putStr("Artist");
+}
+
+void allSong() {
+  cls();
+  locateXY(0,0); putStr("All Song");
+}
+
+void menu() {
+  cls();
+  locateXY(0,0); putStr("Menu");
+}
+
+/*原型
+void demoScreen() {
+  cls();                                            // LCDをクリアする
+  locateXY(0,0); putStr("Main Screen");
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
     locateXY(2,i+1);
     putCh(chr(ord('0')+i));                         // スイッチの番号
@@ -93,6 +133,7 @@ void demoScreen() {
   locateXY(2,7);
   putStr("6:stop");                                 // 6番のスイッチ
 }
+*/
 
 void asta(int y) {
   demoScreen();
@@ -104,6 +145,40 @@ void asta(int y) {
 // MP3 プレーヤのメインプロセス
 //-----------------------------------------------------------------------------
 // ここからプロセスの実行が始まる
+public void shellMain() {
+  spiResetLcd();                                    // sleepを使用するので
+  spiResetMp3();                                    //   プロセスが実行する
+  mp3FilesInit();                                   // ファイル一覧を作る
+  demoScreen();                                     // 画面を初期化
+  for (;;) {
+    int sw = readSw();
+    int num = swToNum(sw);
+    if (num==1) {
+      playlist();
+    } else if (num==2) {
+      album();
+    } else if (num==3) {
+      artist();
+    } else if (num==4) {
+      allSong();
+    } else if (num==5) {
+      menu();
+    } else if (num==6) {                                   // 6 番のスイッチが押された
+      dbgPutStr("stop\n");
+      demoScreen();                                 // 画面を初期化
+      stop();
+    } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
+      demoScreen();                                 // 画面を初期化
+      asta(num);                                    // 再生中の曲に印を表示
+      play(mp3FilesGetPath(num));                   // 再生開始
+      dbgPutStr(mp3FilesGetPath(num));
+      dbgPutStr("\n");
+    }
+    sleep(10);                                      // 10ms に一度
+  }
+}
+
+/* 原型
 public void shellMain() {
   spiResetLcd();                                    // sleepを使用するので
   spiResetMp3();                                    //   プロセスが実行する
@@ -126,6 +201,7 @@ public void shellMain() {
     sleep(10);                                      // 10ms に一度
   }
 }
+*/
 
 struct songInfo{
 	char[][] name;
