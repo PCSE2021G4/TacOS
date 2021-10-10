@@ -42,5 +42,6 @@ install : ${NAME}
 	install -m 755 ${NAME}.bin /usr/local/bin/${NAME}.bin
 
 clean :
-	rm -f ${NAME} ${NAME}.bin *.o *.lst *.sym *.exe *.map *~
+	#rm -f ${NAME} ${NAME}.bin *.o *.lst *.sym *.exe *.map *~
+	rm -f ${NAME} ${NAME}.bin *.o *.lst *.sym *.map *~
 	rm -rf ${NAME}.bin.dSYM
