@@ -2,14 +2,19 @@
 
 if [ $# -lt 1 ]; then
   echo "Usage : `basename $0` <filename> [<as filename>]" >&2
+  echo "Usage : `basename $0` <filename> [<portNum>]" >&2
+
   exit 1
 fi
 
 case `uname` in
   Linux )
-     echo "use port:/dev/ttyS3"
      dev="/dev/ttyS3"
-     stty -F ${dev} 9600 ;;
+     if [ $# = 2 ]; then
+     	dev="/dev/ttyS${2}"
+     fi
+     echo "use port:${dev}"
+     stty -F ${dev} cs8 9600 -ixon -isig -icanon -onlcr ;;
 #  FreeBSD )
 #     dev="/dev/cuaU0" ;;
   Darwin )
@@ -30,4 +35,4 @@ if [ `echo ${dev} | wc -w` -gt 1 ]; then
   exit 1
 fi
 
-ss.bin $@ > ${dev} < ${dev}
+ss.bin $1 > ${dev} < ${dev}
