@@ -22,6 +22,7 @@
  /*
   * ss/ss.cmm : ファイル送信プログラム
   *
+  * windows用に改造
   * 2019.10.21 : 完成
   * 2019.01.28 : 新規作成
   *
@@ -34,7 +35,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <termios.h> //sirial header
 #include <sys/stat.h> //file size
 #include<fcntl.h> //open
 #include<sys/types.h> //open

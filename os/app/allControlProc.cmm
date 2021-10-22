@@ -203,7 +203,7 @@ public void shellMain() {
 }
 */
 
-struct songInfo{
+struct SongInfo{
 	char[][] name;
 	int time;
 	int id;
