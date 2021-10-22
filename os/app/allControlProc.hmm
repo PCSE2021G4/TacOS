@@ -27,3 +27,9 @@
  */
 
 public void shellMain();
+struct SongInfo{
+	char[] name;
+	int time;
+	int id;
+	char[] path;
+};
