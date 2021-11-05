@@ -82,7 +82,7 @@ int swToNum(int sw) {
 // 画面表示
 //-----------------------------------------------------------------------------
 
-void demoScreen() {
+void demoScreen() {                                 // 最初の画面
   cls();                                            // LCDをクリアする
   locateXY(0,0); putStr("Main Screen");
   locateXY(2,2);
@@ -96,7 +96,7 @@ void demoScreen() {
 }
  
 
-void playlist() {
+void playlist() {                                   // プレイリスト画面
   cls();
   locateXY(0,0); putStr("Playlist");
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
@@ -110,7 +110,7 @@ void playlist() {
   putStr("6:back");     
 }
 
-void album() {
+void album() {                                      // アルバム画面
   cls();
   locateXY(0,0); putStr("Album");
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
@@ -124,7 +124,7 @@ void album() {
   putStr("6:back");     
 }
 
-void artist() {
+void artist() {                                     // アーティスト画面
   cls();
   locateXY(0,0); putStr("Artist");
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
@@ -138,7 +138,7 @@ void artist() {
   putStr("6:back");     
 }
 
-void allSong() {
+void allSong() {                                    // 全曲画面
   cls();
   locateXY(0,0); putStr("All Song");
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
@@ -152,18 +152,55 @@ void allSong() {
   putStr("6:back");                                 // 6番のスイッチ
 }
 
-void menu() {
+void menu() {                                       // メニュー画面
   cls();
   locateXY(0,0); putStr("Menu");
+  locateXY(2,2);
+  putStr("1:Add playlist");
+  locateXY(2,3);
+  putStr("2:Return song");
+  locateXY(2,4);
+  putStr("3:Sleep timer");
+}
+
+void number1(int i) {
+  locateXY(7,4);
+  putDec(i,1);
+}
+
+void number2(int i){
+  locateXY(8,4);
+  putDec(i,1);
 }
 
 
-void asta(int y) {
+void timer() {
+  cls();
+  locateXY(9,4);
+  putStr("min");
+}
+
+
+void asta(int y) {                                  // カーソルの表示
   locateXY(0, y);
   putCh('*');
 }    
 
-
+void astaT(int i) {
+  if(i==0) {
+    locateXY(7,3);
+    putCh('*');
+  } else if (i==1) {
+    locateXY(7,5);
+    putCh('*');
+  } else if (i==2) {
+    locateXY(8,3);
+    putCh('*');
+  } else if (i==3) {
+    locateXY(8,5);
+    putCh('*');
+  }
+}
 
 /*原型
 void demoScreen() {
@@ -181,11 +218,11 @@ void demoScreen() {
 }
 */
 
-void playlistProc() {
+void playlistProc() {                               // プレイリストでの処理
   spiResetLcd();                                    // sleepを使用するので
   spiResetMp3();                                    //   プロセスが実行する
   mp3FilesInit();                                   // ファイル一覧を作る
-  playlist();
+  playlist();                                       // プレイリスト画面に初期化
   int pt = 2;
   asta(pt);                                     // 画面を初期化
   for (;;) {
@@ -221,7 +258,7 @@ void playlistProc() {
 }
 
 
-void albumProc() {
+void albumProc() {                                  // アルバムでの処理
   spiResetLcd();                                    // sleepを使用するので
   spiResetMp3();                                    //   プロセスが実行する
   mp3FilesInit();                                   // ファイル一覧を作る
@@ -261,7 +298,7 @@ void albumProc() {
 }
 
 
-void artistProc() {
+void artistProc() {                                 // アーティストでの処理
   spiResetLcd();                                    // sleepを使用するので
   spiResetMp3();                                    //   プロセスが実行する
   mp3FilesInit();                                   // ファイル一覧を作る
@@ -301,7 +338,7 @@ void artistProc() {
 }
 
 
-void allSongProc() {
+void allSongProc() {                                // 全曲での処理
   spiResetLcd();                                    // sleepを使用するので
   spiResetMp3();                                    //   プロセスが実行する
   mp3FilesInit();                                   // ファイル一覧を作る
@@ -341,19 +378,13 @@ void allSongProc() {
 }
 
 
-
-
-//-----------------------------------------------------------------------------
-// MP3 プレーヤのメインプロセス
-//-----------------------------------------------------------------------------
-// ここからプロセスの実行が始まる
-public void shellMain() {
+void menuProc() {                                // メニューでの処理
   spiResetLcd();                                    // sleepを使用するので
   spiResetMp3();                                    //   プロセスが実行する
   mp3FilesInit();                                   // ファイル一覧を作る
-  demoScreen();                                     // 画面を初期化
+  menu();
   int pt = 2;
-  asta(pt);
+  asta(pt);                                     // 画面を初期化
   for (;;) {
     int sw = readSw();
     int num = swToNum(sw);
@@ -361,29 +392,160 @@ public void shellMain() {
       if (pt>2){
         pt=pt-1;
       }
-      demoScreen();
-      asta(pt);  
+      menu();
+      asta(pt);                                    // 再生中の曲に印を表示
     } else if (num==2) {
     } else if (num==3) {
     } else if (num==4) {
-      dbgPutStr("stop\n");
-      demoScreen();                                 // 画面を初期化
-      stop();
+      shellMain();
     } else if (num==5) {
-      if (pt<5){
+      if (pt<4){
         pt=pt+1;
       }
-      demoScreen();
-      asta(pt);
+      menu();
+      asta(pt);                                    // 再生中の曲に印を表示
     } else if (num==6) {                                   // 6 番のスイッチが押された
-      if (pt==2){
-        playlistProc();
+      if (pt==2){                                   // カーソルの位置がptの時
+
       } else if (pt==3) {
-        albumProc();
+
       } else if (pt==4) {
-        artistProc();
+        timerProc();                               // アーティストに遷移
+      }
+    } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
+      menu();                                 // 画面を初期化
+      play(mp3FilesGetPath(pt));                   // 再生開始
+      dbgPutStr(mp3FilesGetPath(pt));
+      dbgPutStr("\n");
+    }
+    sleep(10);                                      // 10ms に一度
+  }
+}
+
+
+
+
+void timerProc() {
+  spiResetLcd();                                    // sleepを使用するので
+  spiResetMp3();                                    //   プロセスが実行する
+  timer();
+  int pt = 2;
+  int flag = 0;
+  int num1 = 0;
+  int num2 = 0;
+  asta(pt);
+  for (;;) {
+    int sw = readSw();                              // スイッチ読み取り
+    int num = swToNum(sw);                          // スイッチの番号を管理
+    if (num==1) {   
+      if (flag==0){
+        if (num2<10){
+          num2=num2+1;
+          pt=2;
+          timer();
+          astaT(pt);
+          number2(num2);
+        }
+      } else if (flag==1){
+        if(num1<10){
+          num1=num1+1;
+          pt=0;
+          timer();
+          astaT(pt);
+          number1(num1);
+        }  
+      }
+    } else if (num==2) {                            // スイッチ２
+      flag=1;
+      if(pt==2){
+        pt=0;
+        timer();
+        astaT(pt);
+      } else if (pt==3) {
+        pt=1;
+        timer();
+        astaT(pt);
+      }
+    } else if (num==3) {                            // スイッチ３
+      flag=0;
+      if(pt==0){
+        pt=2;
+        timer();
+        astaT(pt);
+      } else if (pt==1) {
+        pt=3;
+        timer();
+        astaT(pt);
+      }
+    } else if (num==4) {                            // スイッチ４
+      menuProc();
+    } else if (num==5) {                            // スイッチ５
+      if (flag==0){
+        if (num2>=0){
+          num2=num2-1;
+          pt=3;
+          timer();
+          astaT(pt);
+          number2(num2);
+        }
+      } else if (flag==1){
+        if(num1>=0){
+          num1=num1-1;
+          pt=1;
+          timer();
+          astaT(pt);
+          number1(num1);
+        }  
+      }
+    } else if (num==6) {                                   // 6 番のスイッチが押された
+
+    }
+    sleep(10);                                      // 10ms に一度
+  }
+
+}
+
+
+
+//-----------------------------------------------------------------------------
+// MP3 プレーヤのメインプロセス
+//-----------------------------------------------------------------------------
+// ここからプロセスの実行が始まる
+public void shellMain() {                           // mainの処理
+  spiResetLcd();                                    // sleepを使用するので
+  spiResetMp3();                                    //   プロセスが実行する
+  mp3FilesInit();                                   // ファイル一覧を作る
+  demoScreen();                                     // 画面を初期化
+  int pt = 2;                                       // カーソル管理用の変数
+  asta(pt);                                         // asta関数でカーソル表示
+  for (;;) {
+    int sw = readSw();                              // スイッチ読み取り
+    int num = swToNum(sw);                          // スイッチの番号を管理
+    if (num==1) {                                   // スイッチ１の処理
+      if (pt>2){                                    // カーソルの範囲制限(上方向)
+        pt=pt-1;                                    // カーソル移動
+      }
+      demoScreen();                                 // 画面を初期化
+      asta(pt);                                     // カーソル表示
+    } else if (num==2) {                            // スイッチ２
+    } else if (num==3) {                            // スイッチ３
+    } else if (num==4) {                            // スイッチ４
+      menuProc();
+    } else if (num==5) {                            // スイッチ５
+      if (pt<5){                                    // カーソルの範囲制限(下方向)
+        pt=pt+1;                                    // カーソル移動
+      }
+      demoScreen();                                 // 画面を初期化
+      asta(pt);                                     // カーソル表示
+    } else if (num==6) {                                   // 6 番のスイッチが押された
+      if (pt==2){                                   // カーソルの位置がptの時
+        playlistProc();                             // プレイリストに遷移
+      } else if (pt==3) {
+        albumProc();                                // アルバムに遷移
+      } else if (pt==4) {
+        artistProc();                               // アーティストに遷移
       } else if (pt==5) {
-        allSongProc();
+        allSongProc();                              // 全曲に遷移
       }
     } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
       demoScreen();                                 // 画面を初期化
