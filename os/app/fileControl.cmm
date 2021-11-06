@@ -87,30 +87,35 @@ List addListInt(List list, int id){
     list.next = null;
     return list;
   }
-
-  while (list.next != null){
-    list = list.next;
+  List nowList = list;
+  while (nowList.next != null){
+    nowList = nowList.next;
   }
-  list.next = malloc(sizeof(List));
-  list.next.data = id;
-  list.next.next = null;
+  nowList.next = malloc(sizeof(List));
+  nowList.next.data = id;
+  nowList.next.next = null;
   return list;
 }
 
 //Listから一致する要素を削除する(1つのみ)
 List removeListInt(List list, int id){
   List oldList = null;
-  while(list != null){ //Listにデータあり
-    if( list.data == id ){//削除データと一致
-      if(oldList==null){  //1つ前にリストがない場合
-	List tmpList = list.next;
-	free(list);
+  List nowList = list;
+  while(nowList != null){ //Listにデータあり
+    if( nowList.data == id ){//削除データと一致
+      if(oldList==null){  //1つ前にリストがない場合(先頭削除なら)
+	List tmpList = nowList.next;
+	free(nowList);
 	list = tmpList;
-      }else{
-        oldList.next = list.next; //一つ前のnextを変更
-        free(list);
+	break;
+      }else{ //先頭以外の削除
+        oldList.next = nowList.next; //一つ前のnextを変更
+        free(nowList);
         break;
       }
+    }else{ //次を探索
+	oldList = nowList;
+	nowList = nowList.next;
     }
   }//Listすべて確認済み
   return list;
@@ -169,7 +174,7 @@ public void mp3FilesInit() {
   albamIds = rMalloc(numFile);
   playlistIds = rMalloc(3);
   for(int j=0; j<3; j=j+1) //playList3つ
-    playlistIds[j]= malloc(sizeof(List)); //List割り当て
+    playlistIds[j]= null; //List割り当て
   for (i=0; i<numFile; i=i+1){ //名前とidの場所確保
     fnames[i] = cMalloc(13); //2次元目 ファイル名配列
     //artistNames[i] = cMalloc(11); //アーティスト名(最大10文字)
@@ -217,7 +222,7 @@ public void mp3FilesInit() {
     i = i + 1;
   }
   close(fd);
-  
+
 }
 
 
