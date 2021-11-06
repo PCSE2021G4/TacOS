@@ -33,3 +33,7 @@ struct SongInfo{
 	int id;
 	char[] path;
 };
+struct List{
+	List next;
+	int data;
+};
