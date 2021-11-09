@@ -38,6 +38,7 @@
 #include <allControlProc.hmm>
 #include <musicPlayProc.hmm>
 #include <spi.hmm>
+#include <timerProc.hmm>
 #endif
 
 // ----------------------------------------------------------------------------
@@ -60,6 +61,10 @@ MakePCB(shellMem);                                  // APPのPCBとスタック�
 MakePCB(mp3Mem);                                    // APPのPCBとスタック領域
 int[] shellFds = array(P_FILE_MAX);                 // FDS領域(FSのユーザだけ）
 int[] mp3Fds = array(P_FILE_MAX);                   // FDS領域(FSのユーザだけ）
+
+//タイマー追記
+MakePCB(timerProcMem);
+int[] timerProcFds = array(P_FILE_MAX);
 #endif
 
 // ----------------------------------------------------------------------------
@@ -94,6 +99,9 @@ public void regProc()  {
   // MP3 データ転送プロセス
   newProc(addrof(mp3Main),3,0,EI|KERN,_AtoA(mp3Mem),mp3Fds);
   schProc(_AtoA(mp3Mem));
+
+  newProc(addrof(timerProcMain), 4, 0, EI|KERN, _AtoA(timerProcMem), timerProcFds);
+  schProc(_AtoA(timerProcMem));
 
   // SPIドライバの初期化（プロセス起動前にすべきことをやる）
   spiInit();
