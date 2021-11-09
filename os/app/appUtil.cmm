@@ -30,7 +30,7 @@
 #include <fs.hmm>
 #include <util.hmm>
 #include "appUtil.hmm"
-
+#include "mm.hmm"
 //-----------------------------------------------------------------------------
 // ディレクトリを読む
 //-----------------------------------------------------------------------------
@@ -108,4 +108,18 @@ public int strNcmp(char[] s1, char[] s2, int n) {
     if (s1[i]=='\0') return 0;
   if (i>=n) return 0;
   return ord(s1[i])-ord(s2[i]);
+}
+
+//Malloc関連をstdlibから引用
+public int[] iMalloc(int n) {                   // int配列用の malloc
+  return malloc(sizeof(int)*n);
+}
+public char[] cMalloc(int n) {                  // char配列用の malloc
+  return malloc(sizeof(char)*n);
+}
+public boolean[] bMalloc(int n) {               // boolean配列用の malloc
+  return malloc(sizeof(boolean)*n);
+}
+public void[][] rMalloc(int n) {                // 参照配列用の malloc
+  return malloc(sizeof(void[])*n);
 }
