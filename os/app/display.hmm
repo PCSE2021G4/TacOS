@@ -38,3 +38,4 @@ public void showMenu();                    // メニュー画面の表示
 public void showSleepTimer();              // スリープ画面の表示
 public void setChoice(int choice);         // カーソル位置の更新
 public void setSeekBar(int time);          // シークバーの更新
+public void showMain(); //タイトル

@@ -34,7 +34,7 @@
 #include "spi.hmm"
 #include "font.hmm"
 #include "display.hmm"
-
+#include "fileControl.hmm"
 char[] locateCom = { '\xb0',   // page address
                      '\x10',   // column address Hi = 0x00
                      '\x00',   // column address Lo = 0x00
@@ -92,24 +92,58 @@ public void cls() {
 }
 
 //--------add code --------
+public void showMain(){ //demo screenより
+  cls();                                            // LCDをクリアする
+  locateXY(0,0); putStr("Main Screen");
+  locateXY(2,2);
+  putStr("1:Playlist");
+  locateXY(2,3);
+  putStr("2:Album");
+  locateXY(2,4);
+  putStr("3:Artist");
+  locateXY(2,5);
+  putStr("4:All Song");
+}
+
 public void showLibrary(){
 
 }
 
+//playlist album artist allSong
 public void showList(char[] title, char[][] itemList){
-
+  cls();
+  locateXY(0,0); putStr(title);
+  for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
+    locateXY(2,i+1);
+    putCh(chr(ord('0')+i));                         // スイッチの番号
+    putStr(":");
+    char[] fname = mp3FilesGetName(i);              // 対応するファイル名
+    if (fname!=null) putStr(fname);
+  }
+  locateXY(2,7);
+  putStr("6:back");
 }
 /*
 public void showPlay(SongInfo songInfo){
 
 }
 */
+//menuより
 public void showMenu(){
-
+  cls();
+  locateXY(0,0); putStr("Menu");
+  locateXY(2,2);
+  putStr("1:Add playlist");
+  locateXY(2,3);
+  putStr("2:Return song");
+  locateXY(2,4);
+  putStr("3:Sleep timer");
 }
-
+//timerより
 public void showSleepTimer(){
-
+  cls();
+  locateXY(9,4);
+  putStr("min");
 }
 
 public void setChoice(int choice){
