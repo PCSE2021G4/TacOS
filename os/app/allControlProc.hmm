@@ -37,3 +37,6 @@ struct List{
 	List next;
 	int data;
 };
+
+void menuProc();
+void timerProc();
