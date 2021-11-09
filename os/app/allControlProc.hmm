@@ -38,5 +38,6 @@ struct List{
 	int data;
 };
 
-void menuProc();
-void timerProc();
+void menuProc(boolean first);
+void timerProc(boolean first);
+void mainProc(boolean first);
