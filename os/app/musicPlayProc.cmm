@@ -33,7 +33,7 @@
 #include "musicPlayProc.hmm"
 #include "spi.hmm"
 #define BUFSIZ 512                          // MP3 ファイル用のバッファ
-
+#include "allControlProc.hmm"
 // メッセージ
 #define STOP  1                             // 再生停止要求メッセージ
 #define START 2                             // 再生開始要求メッセージ
@@ -46,6 +46,12 @@
 int link;                                   // メッセージ通信用のリンク
 boolean syncFlag = false;                   // クライアントが同期待ちである
 
+boolean isPlay = false; //再生中か
+boolean isShuffle = false;
+boolean isLoop = false;
+int[] nextSongIds; //再生する曲一覧
+SongInfo songInfo; //再生中の曲情報
+
 //-----------------------------------------------------------------------------
 // クライアントプロセスが呼び出す
 //-----------------------------------------------------------------------------
@@ -53,12 +59,15 @@ boolean syncFlag = false;                   // クライアントが同期待ち
 // 音楽再生停止
 public void stop() {
   syncFlag = true;                          // データ転送プロセスをコマンド待にする
+  isPlay = false;
   sndrec(link, STOP, 0, 0, 0);              // 同期要求メッセージ
 }
 
 // 音楽再生
 public boolean play(char[] path) {
   syncFlag = true;                          // データ転送プロセスをコマンド待にする
+  isPlay = true;
+
   int r = sndrec(link, START,
                   _AtoI(path), 0, 0);       // 再生開始メッセージ
   return r==OK;                             // 成功なら true を返す
@@ -101,3 +110,25 @@ public void mp3Main() {
     }
   }
 }
+
+public void changePause(){
+  isPlay = !isPlay;
+  //TODO pause
+}
+
+public void changeShuffle(){
+  isShuffle = !isShuffle;
+}
+
+public void changeLoop(){
+  isLoop = !isLoop;
+}
+
+public void volumeUp(){
+}
+
+public void volumeDown(){
+}
+
+
+
