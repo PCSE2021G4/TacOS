@@ -34,6 +34,8 @@
 #include "spi.hmm"
 #define BUFSIZ 512                          // MP3 ファイル用のバッファ
 #include "allControlProc.hmm"
+#include <mm.hmm>
+#include "fileControl.hmm"
 // メッセージ
 #define STOP  1                             // 再生停止要求メッセージ
 #define START 2                             // 再生開始要求メッセージ
@@ -51,7 +53,7 @@ boolean isShuffle = false;
 boolean isLoop = false;
 int[] nextSongIds; //再生する曲一覧
 SongInfo songInfo; //再生中の曲情報
-
+char[] path=null;
 //-----------------------------------------------------------------------------
 // クライアントプロセスが呼び出す
 //-----------------------------------------------------------------------------
@@ -64,15 +66,23 @@ public void stop() {
 }
 
 // 音楽再生
-public boolean play(char[] path) {
+public boolean play(int idsIdx) {
   syncFlag = true;                          // データ転送プロセスをコマンド待にする
   isPlay = true;
 
+  int songId = nextSongIds[idsIdx]; //次の曲id取り出し
+  if(path != null) free(path);
+  path = mp3FilesGetPath(songId); //path取得
+  printF("play:%s\n", path);
   int r = sndrec(link, START,
                   _AtoI(path), 0, 0);       // 再生開始メッセージ
   return r==OK;                             // 成功なら true を返す
 }
 
+//再生する曲一覧登録
+public void setSongIds(int[] songIds){
+  nextSongIds = songIds;
+}
 //-----------------------------------------------------------------------------
 // 音楽データ転送用のプロセス
 //-----------------------------------------------------------------------------
@@ -94,6 +104,7 @@ void trans(char[] path) {
   }
   spiFlushMp3();                            // デコーダLSIのバッファをクリアし
   close(fd);                                // ファイルをクローズ
+  printF("trans End");
 }
 
 // mp3Main は，プロセスのメインルーチンとしてカーネルに登録しておく．

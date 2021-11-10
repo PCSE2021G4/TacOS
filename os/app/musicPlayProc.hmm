@@ -25,10 +25,11 @@
  * 2020.08.30 : 新規作成
  *
  */
-public boolean play(char[] path);
+public boolean play(int idsIdx);
 public void stop();
 public void mp3Main();
 public void changePause();
 public void changeShuffle();
 public void volumeUp();
 public void volumeDown();
+public void setSongIds(int[] songIds); 

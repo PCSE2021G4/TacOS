@@ -112,13 +112,16 @@ public void showLibrary(){
 //playlist album artist allSong
 public void showList(char[] title, char[][] itemList){
   cls();
-  locateXY(0,0); putStr(title);
+  locateXY(0,0); putStr(title); //title
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
+    char[] names = itemList[i-1];
+    if (names==null) break;
+ 
     locateXY(2,i+1);
     putCh(chr(ord('0')+i));                         // スイッチの番号
     putStr(":");
-    char[] fname = mp3FilesGetName(i);              // 対応するファイル名
-    if (fname!=null) putStr(fname);
+    putStr(names);
+    //char[] fname = mp3FilesGetName(i);              // 対応するファイル名
   }
   locateXY(2,7);
   putStr("6:back");

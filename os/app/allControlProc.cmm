@@ -27,6 +27,10 @@
  * $Id$
  *
  */
+#include <fs.hmm>
+#include "appUtil.hmm"
+
+#include <stdlib.hmm>
 #include <kernel.hmm>
 #include <util.hmm>
 #include "display.hmm"
@@ -52,7 +56,9 @@ int sw1 = 0x00;                                     // 前回の状態(デバウ
 
 int scene = 0; //0:title, 1:playlist 2:album 3artist 4:allsong 5:menu 6:sleepTimer
 int pt=2; //pointer 2:一番上, 増えると下へ
+char[][] dispList; //リスト表示用
 
+char[][] playListString; // ={"list1","list2","list3".null}
 int readSw() {
   int sw = ~in(0x18) & SWS;                         // スイッチを読み正論理に変換
   int swd = sw & sw0;                               // デバウンス
@@ -121,7 +127,8 @@ void astaT(int i) {
 void playlistProc(boolean first) {                               // プレイリストでの処理
   if(first){
     scene = 1;
-    showList("PlayList", null);                                       // プレイリスト画面に初期化
+    dispList = playListString;
+    showList("PlayList", dispList);                                       // プレイリスト画面に初期化
     int pt = 2;
     asta(pt);                                     // 画面を初期化
   }
@@ -131,26 +138,27 @@ void playlistProc(boolean first) {                               // プレイリ
     if (pt>2){ //カーソル動かせるなら
       pt=pt-1;
     }
-    showList("PlayList", null);                  // プレイリスト画面に初期化
+    showList("PlayList", dispList);                  // プレイリスト画面に初期化
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==2) {
-  } else if (num==3) {
-  } else if (num==4) {
   } else if (num==5) {
     if (pt<7){
       pt=pt+1;
     }
-    showList("PlayList", null);
+    showList("PlayList", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==6) {                           // 6 番のスイッチが押された
+  } else if (num==4) {                           // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
-  } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
-    showList("PlayList", null);
-    play(mp3FilesGetPath(pt));                   // 再生開始
-    dbgPutStr(mp3FilesGetPath(pt));
-    dbgPutStr("\n");
+  } else if (num==6) { // ファイルと対応するボタン
+    int select_id = pt-2; //idx
+    int fileSize = getFileSize();//曲数
+    int[] songIds = getSongIdsPlaylist(select_id);//id一覧
+
+    dispList = idsToSongNames(songIds); //曲名一覧
+    setSongIds(songIds); //id一覧を登録
+    allSongProc(true);//歌一覧へ
+    
   }
 
 }
@@ -159,7 +167,8 @@ void playlistProc(boolean first) {                               // プレイリ
 void albumProc(boolean first) {                                  // アルバムでの処理
   if(first){
     scene = 2;
-    showList("album", null);
+    dispList = getAlbumNames();
+    showList("Artist", dispList);
     pt = 2;
     asta(pt);                                     // 画面を初期化
   }
@@ -169,34 +178,34 @@ void albumProc(boolean first) {                                  // アルバム
     if (pt>2){
       pt=pt-1;
     }
-    showList("album", null);
+    showList("album", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==2) {
-  } else if (num==3) {
-  } else if (num==4) {
   } else if (num==5) {
     if (pt<7){
       pt=pt+1;
     }
-    showList("album", null);
-
+    showList("album", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==6) {                                   // 6 番のスイッチが押された
+  } else if (num==4) {                                   // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
-  } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
-    showList("album", null);                                 // 画面を初期化
-    play(mp3FilesGetPath(pt));                   // 再生開始
-    dbgPutStr(mp3FilesGetPath(pt));
-    dbgPutStr("\n");
+  } else if (num ==6) { // ファイルと対応するボタン
+    int select_id = pt-2; //idx
+    int fileSize = getFileSize();//曲数
+    int[] songIds = getSongIdsAlbum(select_id);//id一覧
+
+    dispList = idsToSongNames(songIds); //曲名一覧
+    setSongIds(songIds); //id一覧を登録
+    allSongProc(true);//歌一覧へ
   }
 }
 
 
 void artistProc(boolean first) {                                 // アーティストでの処理
   if(first){
-    showList("Artist", null);
+    dispList = getArtistNames();
+    showList("Artist", dispList);
     scene = 3;
     pt = 2;
     asta(pt);                                     // 画面を初期化
@@ -207,26 +216,26 @@ void artistProc(boolean first) {                                 // アーティ
     if (pt>2){
       pt=pt-1;
     }
-    showList("Artist", null);
+    showList("Artist", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==2) {
-  } else if (num==3) {
-  } else if (num==4) {
   } else if (num==5) {
     if (pt<7){
       pt=pt+1;
     }
-    showList("Artist", null);
+    showList("Artist", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==6) {                                   // 6 番のスイッチが押された
+  } else if (num==4) {                                   // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
-  } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
-    showList("Artist", null);                                 // 画面を初期化
-    play(mp3FilesGetPath(pt));                   // 再生開始
-    dbgPutStr(mp3FilesGetPath(pt));
-    dbgPutStr("\n");
+  } else if (num==6) { // ファイルと対応するボタン
+    int select_id = pt-2; //idx
+    int fileSize = getFileSize();//曲数
+    int[] songIds = getSongIdsArtist(select_id);//id一覧
+
+    dispList = idsToSongNames(songIds); //曲名一覧
+    setSongIds(songIds); //id一覧を登録
+    allSongProc(true);//歌一覧へ
   }
 }
 
@@ -234,35 +243,31 @@ void artistProc(boolean first) {                                 // アーティ
 void allSongProc(boolean first) {                                // 全曲での処理
   if(first){
     scene = 4;
-    showList("AllSong", null);
+    showList("SongList", dispList);
     pt = 2;
     asta(pt);                                     // 画面を初期化
   }
   int sw = readSw();
   int num = swToNum(sw);
-  if (num==1) {
-    if (pt>2){
-      pt=pt-1;
-    }
-    showList("AllSong", null);
+  if (num==1) {//up
+    if (pt>2) pt=pt-1; //減らす
+    showList("SongList", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==2) {
-  } else if (num==3) {
-  } else if (num==4) {
-  } else if (num==5) {
-    if (pt<7){
-      pt=pt+1;
-    }
-    showList("AllSong", null);
+  } else if (num==5) {//down
+    if (pt<7) pt=pt+1; //増やす
+    showList("SongList", dispList);
     asta(pt);                                    // 再生中の曲に印を表示
-  } else if (num==6) {                                   // 6 番のスイッチが押された
+  } else if (num==4) {                                   // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
-  } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
-    showList("AllSong", null);                                 // 画面を初期化
-    play(mp3FilesGetPath(pt));                   // 再生開始
-    dbgPutStr(mp3FilesGetPath(pt));
+  } else if (num==6) { // ファイルと対応するボタン
+    int select_id = pt-2;
+    int fileSize = getFileSize();//曲数
+    play(select_id);
+
+    showList("AllSong", dispList);                                 // 画面を初期化
+    dbgPutStr(mp3FilesGetPath(select_id));
     dbgPutStr("\n");
   }
 }
@@ -304,7 +309,7 @@ void menuProc(boolean first) {                                // メニューで
       }
     } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
       showMenu();                                 // 画面を初期化
-      play(mp3FilesGetPath(pt));                   // 再生開始
+      //play(mp3FilesGetPath(pt));                   // 再生開始
       dbgPutStr(mp3FilesGetPath(pt));
       dbgPutStr("\n");
     }
@@ -423,12 +428,14 @@ void mainProc(boolean first){
       } else if (pt==4) {
         artistProc(true);                               // アーティストに遷移
       } else if (pt==5) {
+        dispList = getSongNames();
+        setSongIds(getSongIds()); //id一覧を登録
         allSongProc(true);                              // 全曲に遷移
       }
     } else if (num>1 && mp3FilesGetName(num)!=null) { // ファイルと対応するボタン
       showMain();                                 // 画面を初期化
       asta(num);                                    // 再生中の曲に印を表示
-      play(mp3FilesGetPath(num));                   // 再生開始
+      //play(mp3FilesGetPath(num));                   // 再生開始
       dbgPutStr(mp3FilesGetPath(num));
       dbgPutStr("\n");
     }
@@ -447,6 +454,9 @@ public void shellMain() {                           // mainの処理
   showMain();                                     // 画面を初期化
   int pt = 2;                                       // カーソル管理用の変数
   asta(pt);                                         // asta関数でカーソル表示
+
+  playListString = rMalloc(4);
+  playListString[0]="list 1"; playListString[1]="list 2"; playListString[2] = "list 3"; playListString[3]=null;
   for (;;) {
 //0:title, 1:playlist 2:album 3artist 4:allsong 5:menu 6:sleepTimer
     if(scene == 0) mainProc(false);
