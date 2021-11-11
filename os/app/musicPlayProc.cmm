@@ -57,6 +57,8 @@ boolean cPlay = false;
 int[] nextSongIds; //再生する曲一覧
 SongInfo songInfo; //再生中の曲情報
 char[] path=null;
+
+int nowPlayId = 0;
 //-----------------------------------------------------------------------------
 // クライアントプロセスが呼び出す
 //-----------------------------------------------------------------------------
@@ -70,6 +72,7 @@ public void stop() {
 
 // 音楽再生
 public boolean play(int idsIdx) {
+  nowPlayId = idsIdx;
   syncFlag = true;                          // データ転送プロセスをコマンド待にする
   isPlay = true;
 
@@ -102,7 +105,14 @@ void trans(char[] path) {
   send(link, OK);                           // クライアントに成功を通知
   int len;
   int kaisuu=0;
+  Stat stat_data = malloc(sizeof(Stat));//file info
+  stat(path, stat_data);
+  //printF("High:%x Low:%x",stat_data.lenH, stat_data.lenL);
+  //kaisuu = stat_data.lenL/BUFSIZ+1;
+  //printF("kaisuu:%d\n",kaisuu);
+  kaisuu = 0;
   while((len=read(fd, buf, BUFSIZ))>0) kaisuu=kaisuu+1;
+  printF("kaisuu22:%d\n",kaisuu);
   close(fd);
   fd = open(path, READ_MODE);           // ファイルをオープン)
   int kaisuu_s=0;
@@ -194,4 +204,20 @@ public void changePlay(){
   cPlay = !cPlay;
 }
 
+public void nextPlay(){
+  int size = 0;
+  while(nextSongIds[size] != -1) size=size+1;
+  if(size > nowPlayId+1){
+        stop();
+	play(nowPlayId+1);
+  }
+}
 
+public void prevPlay(){
+  printF("prev:%d\n", nowPlayId);
+  if(0 <= nowPlayId-1){
+        stop();
+	play(nowPlayId-1);
+  }
+  
+}

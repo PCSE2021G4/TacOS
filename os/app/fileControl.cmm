@@ -377,8 +377,9 @@ public int[] getSongIdsPlaylist(int id){
 }
 
 public int[] getSongIds(){
-   int[] ids = iMalloc(numFile);
+   int[] ids = iMalloc(numFile+1);
    for(int i=0; i<numFile; i=i+1) ids[i] = i;
+   ids[numFile] = -1;
    return ids;
 }
 
