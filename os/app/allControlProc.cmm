@@ -38,6 +38,7 @@
 #include "spi.hmm"
 #include "fileControl.hmm"
 #include "allControlProc.hmm"
+#include "timerProc.hmm"
 
 #define MAINNUM 0
 #define PLAYLISTNUM 1
@@ -324,77 +325,33 @@ int flag,num1,num2;
 void timerProc(boolean first) {
   if(first){
     showSleepTimer();
-    pt = 2;
-    flag = 0;
-    num1 = 0;
-    num2 = 0;
-    asta(pt);
+    pt = 0;
+    num1 = 0;//右
+    astaT(pt);
     scene = TIMERNUM; //画面遷移を記録せず移動(oldSceneを触らない)
   }
     int sw = readSw();                              // スイッチ読み取り
     int num = swToNum(sw);                          // スイッチの番号を管理
-    if (num==1) {   
-      if (flag==0){
-        if (num2<10){
-          num2=num2+1;
-          pt=2;
-          showSleepTimer();
-          astaT(pt);
-          number2(num2);
-        }
-      } else if (flag==1){
-        if(num1<10){
+    if (num==1) {  //up 
           num1=num1+1;
           pt=0;
           showSleepTimer();
           astaT(pt);
           number1(num1);
-        }  
-      }
-    } else if (num==2) {                            // スイッチ２
-      flag=1;
-      if(pt==2){
-        pt=0;
-        showSleepTimer();
-        astaT(pt);
-      } else if (pt==3) {
-        pt=1;
-        showSleepTimer();
-        astaT(pt);
-      }
-    } else if (num==3) {                            // スイッチ３
-      flag=0;
-      if(pt==0){
-        pt=2;
-        showSleepTimer();
-        astaT(pt);
-      } else if (pt==1) {
-        pt=3;
-        showSleepTimer();
-        astaT(pt);
-      }
-    } else if (num==4) {                            // スイッチ４
+          
+    } else if (num==4) { //back                           // スイッチ４
       backScene();
     } else if (num==5) {                            // スイッチ５
-      if (flag==0){
-        if (num2>=0){
-          num2=num2-1;
-          pt=3;
-          showSleepTimer();
-          astaT(pt);
-          number2(num2);
-        }
-      } else if (flag==1){
-        if(num1>=0){
+        if(num1>0){
           num1=num1-1;
           pt=1;
           showSleepTimer();
           astaT(pt);
           number1(num1);
         }  
-      }
     } else if (num==6) {                                   // 6 番のスイッチが押された
-
+	setSleep(num1*60);
+        backScene();
     }
 
 }
