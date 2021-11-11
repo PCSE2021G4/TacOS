@@ -306,9 +306,8 @@ void menuProc(boolean first) {                                // メニューで
       if (pt==2){ //addPlaylist                                  // カーソルの位置がptの時
 	//TODO
 	addPlaylistProc(true);
-      } else if (pt==3) {
 
-      } else if (pt==4) {
+      } else if (pt==3) {
         timerProc(true);                               // アーティストに遷移
       
       }
