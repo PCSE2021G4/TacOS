@@ -69,6 +69,7 @@ int scene = 0, oldScene=0; //0:main, 1:playlist 2:album 3artist 4:allsong 5:menu
 int pt=2, oldPt=0; //pointer 2:一番上, 増えると下へ
 int page = 0; //ページ数
 char[][] dispList; //リスト表示用
+int[] songIds; //画面表示してる曲のid一覧
 
 char[][] playListString; // ={"list1","list2","list3".null}
 int readSw() {
@@ -165,7 +166,7 @@ void playlistProc(boolean first) {                               // プレイリ
   } else if (num==6) { // ファイルと対応するボタン
     int select_id = pt-2; //idx
     int fileSize = getFileSize();//曲数
-    int[] songIds = getSongIdsPlaylist(select_id);//id一覧
+    songIds = getSongIdsPlaylist(select_id);//id一覧
 
     dispList = idsToSongNames(songIds); //曲名一覧
     setSongIds(songIds); //id一覧を登録
@@ -195,7 +196,7 @@ void albumProc(boolean first) {                                  // アルバム
   } else if (num ==6) { // ファイルと対応するボタン
     int select_id = pt-2; //idx
     int fileSize = getFileSize();//曲数
-    int[] songIds = getSongIdsAlbum(select_id);//id一覧
+    songIds = getSongIdsAlbum(select_id);//id一覧
 
     dispList = idsToSongNames(songIds); //曲名一覧
     setSongIds(songIds); //id一覧を登録
@@ -223,7 +224,7 @@ void artistProc(boolean first) {                                 // アーティ
   } else if (num==6) { // ファイルと対応するボタン
     int select_id = pt-2; //idx
     int fileSize = getFileSize();//曲数
-    int[] songIds = getSongIdsArtist(select_id);//id一覧
+    songIds = getSongIdsArtist(select_id);//id一覧
 
     dispList = idsToSongNames(songIds); //曲名一覧
     setSongIds(songIds); //id一覧を登録
@@ -260,10 +261,8 @@ void allSongProc(boolean first) {                                // 全曲での
 
 void menuProc(boolean first) {                                // メニューでの処理
   if(first){
-    showMenu();
-    pt = 2;
-    asta(pt);                                     // 画面を初期化
     setScene(MENUNUM);
+    reShow(true);
   }
 
     int sw = readSw();
@@ -392,8 +391,8 @@ void addPlaylistProc(boolean first){
 
   if (num ==6) { // ファイルと対応するボタン
     int select_id = pt-2; //idx
-    int song_id = oldPt; //TODO ページ数を加味
-    addPlaylist(select_id, song_id);
+    int song_id = oldPt-2; //TODO ページ数を加味
+    addPlaylist(select_id, songIds[song_id]);
     backScene();
   }
   if(num == 4) backScene();
@@ -423,6 +422,7 @@ void mainProc(boolean first){
       } else if (pt==5) {
         dispList = getSongNames();
         setSongIds(getSongIds()); //id一覧を登録
+        songIds = getSongIds();
         allSongProc(true);                              // 全曲に遷移
       }
     }
