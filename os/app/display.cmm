@@ -179,10 +179,9 @@ public void showSleepTimer(){
   putStr("min");
 }
 
-public void setChoice(int choice){
-
+public void showPlay(){
+  cls();
+  locateXY(4,3);
+  putStr("Play now");
 }
 
-public void setSeekBar(int time){
-
-}
