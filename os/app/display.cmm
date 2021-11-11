@@ -139,16 +139,17 @@ public void showMain(){ //demo screenより
 }
 
 
-//playlist album artist allSong
-public void showList(char[] title, char[][] itemList){
+//playlist album artist allSong pageは0から
+public void showList(char[] title, char[][] itemList, int page){
   cls();
   locateXY(0,0); putStr(title); //title
+  int shiftIdx = page*5;
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
-    char[] names = itemList[i-1];
+    char[] names = itemList[i-1+shiftIdx];
     if (names==null) break;
  
     locateXY(2,i+1);
-    putCh(chr(ord('0')+i));                         // スイッチの番号
+    putCh(chr(ord('0')+i+shiftIdx));                         // スイッチの番号
     putStr(":");
     putStr(names);
     //char[] fname = mp3FilesGetName(i);              // 対応するファイル名

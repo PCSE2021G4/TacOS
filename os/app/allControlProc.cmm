@@ -65,13 +65,39 @@ int sw0 = 0x00;                                     // 前回の状態(デバウ
 int sw1 = 0x00;                                     // 前回の状態(デバウンス後)
 int menuCnt = 0;//長押ししてる時間
 
+int page = 0, oldPage =0;//showListのページ数
 int scene = 0, oldScene=0; //0:main, 1:playlist 2:album 3artist 4:allsong 5:menu 6:sleepTimer
 int pt=2, oldPt=0; //pointer 2:一番上, 増えると下へ
-int page = 0; //ページ数
 char[][] dispList; //リスト表示用
 int[] songIds; //画面表示してる曲のid一覧
 
 char[][] playListString; // ={"list1","list2","list3".null}
+
+//現在表示してる項目数取得
+int getDispListSize(){
+  int size = 0;
+  while(dispList[size] != null) size=size+1;
+  return size;
+}
+
+void nextPage(){
+  int size = getDispListSize();
+
+  if(size - (page+1)*5 > 0){
+	page = page+1;
+	pt = 2;
+  }
+  reShow(false);
+}
+void prevPage(){
+  if(page > 0){ 
+	page = page-1;
+	pt = 6;
+  }
+  reShow(false);
+}
+
+
 int readSw() {
   int sw = ~in(0x18) & SWS;                         // スイッチを読み正論理に変換
   int swd = sw & sw0;                               // デバウンス
@@ -118,13 +144,13 @@ int swToNum(int sw) {
 }
 void reShow(boolean movePt){
   if(scene == MAINNUM) showMain();
-  else if(scene == PLAYLISTNUM) showList("playList", dispList);
-  else if(scene == ALBUMNUM) showList("albumList", dispList);
-  else if(scene == ARTISTNUM) showList("artistList", dispList);
-  else if(scene == ALLSONGNUM) showList("songList", dispList);
+  else if(scene == PLAYLISTNUM) showList("playList", dispList,page);
+  else if(scene == ALBUMNUM) showList("albumList", dispList, page);
+  else if(scene == ARTISTNUM) showList("artistList", dispList, page);
+  else if(scene == ALLSONGNUM) showList("songList", dispList, page);
   else if(scene == MENUNUM) showMenu();
   else if(scene == TIMERNUM) showSleepTimer();
-  else if(scene == ADDPLAYLISTNUM) showList("select playlist", playListString);
+  else if(scene == ADDPLAYLISTNUM) showList("select playlist", playListString, page);
 
   if(movePt){//カーソル移動
     pt = 2;
@@ -142,6 +168,8 @@ void setScene(int sceneNum){
   oldPt = pt;
   oldScene = scene;
   scene = sceneNum;//0:title, 1:playlist 2:album 3artist 4:allsong 5:menu 6:timer(sleep)
+  oldPage = page;
+  page = 0;
 } 
 
 //-----------------------------------------------------------------------------
@@ -187,14 +215,14 @@ void albumProc(boolean first) {                                  // アルバム
   }
   int sw = readSw();
   int num = swToNum(sw);
-  if(num==1){ reShow(false); changePt(-1, 5);}
-  if(num==5){ reShow(false); changePt(1, 5);}
+  if(num==1){ reShow(false); changePt(-1, getDispListSize());}
+  if(num==5){ reShow(false); changePt(1, getDispListSize());}
   if(num==4) {                                   // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num ==6) { // ファイルと対応するボタン
-    int select_id = pt-2; //idx
+    int select_id = pt-2+page*5; //idx
     int fileSize = getFileSize();//曲数
     songIds = getSongIdsAlbum(select_id);//id一覧
 
@@ -215,14 +243,14 @@ void artistProc(boolean first) {                                 // アーティ
   }
   int sw = readSw();
   int num = swToNum(sw);
-  if(num==1){ reShow(false); changePt(-1, 5);}
-  if(num==5){ reShow(false); changePt(1, 5);}
+  if(num==1){ reShow(false); changePt(-1, getDispListSize());}
+  if(num==5){ reShow(false); changePt(1, getDispListSize());}
   if(num==4) {                                   // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num==6) { // ファイルと対応するボタン
-    int select_id = pt-2; //idx
+    int select_id = pt-2+page*5; //idx
     int fileSize = getFileSize();//曲数
     songIds = getSongIdsArtist(select_id);//id一覧
 
@@ -242,14 +270,14 @@ void allSongProc(boolean first) {                                // 全曲での
   }
   int sw = readSw();
   int num = swToNum(sw);
-  if(num==1){ reShow(false); changePt(-1, 5);}
-  if(num==5){ reShow(false); changePt(1, 5);}
+  if(num==1){ reShow(false); changePt(-1, getDispListSize());} //up
+  if(num==5){ reShow(false); changePt(1, getDispListSize());}
   if (num==4) {                                   // 6 番のスイッチが押された
     dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num==6) { // ファイルと対応するボタン
-    int select_id = pt-2;
+    int select_id = pt-2+page*5;
     int fileSize = getFileSize();//曲数
     play(select_id);
     playScreenProc(true);
@@ -375,9 +403,15 @@ void changePt(int diff, int limit){
   limit = limit + 2 - 1; //under+1からなので-1
   int min = 2; //最小
   pt = pt + diff;
+  if(limit < pt+page*5) pt = pt-diff;
+
+  if(pt >= 5+2) nextPage();
+  if(pt < min) prevPage();
+
   if(min > pt) pt = min;
-  if(limit < pt) pt = limit;
+
   asta(pt);
+
 }
 
 void addPlaylistProc(boolean first){
@@ -390,8 +424,8 @@ void addPlaylistProc(boolean first){
   if(num==5){ reShow(false); changePt(1, 3);}
 
   if (num ==6) { // ファイルと対応するボタン
-    int select_id = pt-2; //idx
-    int song_id = oldPt-2; //TODO ページ数を加味
+    int select_id = pt-2+page*5; //現在のidx(playlist番号)
+    int song_id = oldPt-2+oldPage*5; //TODO ページ数を加味
     addPlaylist(select_id, songIds[song_id]);
     backScene();
   }
@@ -403,9 +437,7 @@ void mainProc(boolean first){
   int num = swToNum(readSw()); //ボタン入力
     if(first){
       setScene(MAINNUM);
-      showMain();
-      pt = 2;
-      asta(pt);
+      reShow(true);
     }
     if(num==1){ reShow(false); changePt(-1, 4);}
     if(num==5){ reShow(false); changePt(1, 4);}
