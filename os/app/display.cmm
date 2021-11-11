@@ -155,7 +155,6 @@ public void showList(char[] title, char[][] itemList, int page){
     //char[] fname = mp3FilesGetName(i);              // 対応するファイル名
   }
   locateXY(2,7);
-  putStr("6:back");
 }
 /*
 public void showPlay(SongInfo songInfo){
