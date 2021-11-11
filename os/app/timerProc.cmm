@@ -1,6 +1,7 @@
 #include <util.hmm>
 #include <kernel.hmm>
 #include "timerProc.hmm"
+#include "musicPlayProc.hmm"
 int nowTime=0; //起動からの経過時間(s)
 int endSleepTime = 0; //スリープタイマー終了時間
 boolean isSleepTimer = false; //スリープタイマー動作中か
@@ -36,6 +37,7 @@ public void timerProcMain(){
 			//スリープタイマー動作終了
 			isSleepTimer = false;
 			//music stopを送信 TODO
+		 	stop();	
 		}
 	}
 }
