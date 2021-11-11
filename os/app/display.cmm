@@ -40,6 +40,39 @@ char[] locateCom = { '\xb0',   // page address
                      '\x00',   // column address Lo = 0x00
                      '\xff' }; // EOF
 
+
+public void number1(int i) {
+  locateXY(7,4);
+  putDec(i,1);
+}
+
+public void number2(int i){
+  locateXY(8,4);
+  putDec(i,1);
+}
+
+
+public void asta(int y) {                                  // カーソルの表示
+  locateXY(0, y);
+  putCh('*');
+}    
+
+public void astaT(int i) {
+  if(i==0) {
+    locateXY(7,3);
+    putCh('*');
+  } else if (i==1) {
+    locateXY(7,5);
+    putCh('*');
+  } else if (i==2) {
+    locateXY(8,3);
+    putCh('*');
+  } else if (i==3) {
+    locateXY(8,5);
+    putCh('*');
+  }
+}
+
 // 液晶上でカーソルを(x,y)に移動
 public void locateXY(int x, int y) {
   int x8 = x * 8;
@@ -105,20 +138,20 @@ public void showMain(){ //demo screenより
   putStr("4:All Song");
 }
 
-public void showLibrary(){
-
-}
 
 //playlist album artist allSong
 public void showList(char[] title, char[][] itemList){
   cls();
-  locateXY(0,0); putStr(title);
+  locateXY(0,0); putStr(title); //title
   for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
+    char[] names = itemList[i-1];
+    if (names==null) break;
+ 
     locateXY(2,i+1);
     putCh(chr(ord('0')+i));                         // スイッチの番号
     putStr(":");
-    char[] fname = mp3FilesGetName(i);              // 対応するファイル名
-    if (fname!=null) putStr(fname);
+    putStr(names);
+    //char[] fname = mp3FilesGetName(i);              // 対応するファイル名
   }
   locateXY(2,7);
   putStr("6:back");
