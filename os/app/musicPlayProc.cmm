@@ -36,6 +36,7 @@
 #include "allControlProc.hmm"
 #include <mm.hmm>
 #include "fileControl.hmm"
+#include "display.hmm"
 // メッセージ
 #define STOP  1                             // 再生停止要求メッセージ
 #define START 2                             // 再生開始要求メッセージ
@@ -51,6 +52,8 @@ boolean syncFlag = false;                   // クライアントが同期待ち
 boolean isPlay = false; //再生中か
 boolean isShuffle = false;
 boolean isLoop = false;
+
+boolean cPlay = false;
 int[] nextSongIds; //再生する曲一覧
 SongInfo songInfo; //再生中の曲情報
 char[] path=null;
@@ -98,13 +101,57 @@ void trans(char[] path) {
   }
   send(link, OK);                           // クライアントに成功を通知
   int len;
+  int kaisuu=0;
+  while((len=read(fd, buf, BUFSIZ))>0) kaisuu=kaisuu+1;
+  close(fd);
+  fd = open(path, READ_MODE);           // ファイルをオープン)
+  int kaisuu_s=0;
+  int kaisuu_w=0;
+  int basho=2;
+  kaisuu_s = kaisuu/10;
+
   while ((len=read(fd, buf, BUFSIZ))>0) {   // データをファイルから読み
     spiWriteMp3Dat(buf, len);               //   MP3デコーダにデータを送る
     if (syncFlag) break;                    //   クライアントが待っている
+       kaisuu_w=kaisuu_w+1;
+    if(kaisuu_s < kaisuu_w){
+        kaisuu_w=0;
+        basho=basho+1;
+        locateXY(basho,6);
+        putStr("*");
+    }
+    while(cPlay){}
   }
   spiFlushMp3();                            // デコーダLSIのバッファをクリアし
   close(fd);                                // ファイルをクローズ
   //printF("trans End");
+
+  while(isLoop){
+    kaisuu_w=0;
+    basho=2;
+    locateXY(3,6);
+    putStr("          ");
+    fd = open(path, READ_MODE);           // ファイルをオープン
+    if (fd<0) {                               // オープンできない
+      send(link, ERR);                        //   クライアントにエラーを通知
+      return;                                 //   コマンド待に戻る
+    }
+    send(link, OK);                           // クライアントに成功を通知
+    while ((len=read(fd, buf, BUFSIZ))>0) {   // データをファイルから読み
+      spiWriteMp3Dat(buf, len);               //   MP3デコーダにデータを送る
+      kaisuu_w=kaisuu_w+1;
+      if(kaisuu_s < kaisuu_w){
+        kaisuu_w=0;
+        basho=basho+1;
+        locateXY(basho,6);
+        putStr("*");
+      }
+      while(cPlay){}
+      if (syncFlag) break;                    //   クライアントが待っている
+    }
+    spiFlushMp3();                            // デコーダLSIのバッファをクリアし
+    close(fd);
+  } 
 }
 
 // mp3Main は，プロセスのメインルーチンとしてカーネルに登録しておく．
@@ -135,11 +182,16 @@ public void changeLoop(){
   isLoop = !isLoop;
 }
 
-public void volumeUp(){
+public void volumeChange(){
+  int setvol=2020;
+  setvol=spiReadMp3Reg(0x0b); //now volume
+  if(setvol<0xE0E0) setvol = 0x0000;
+  if(setvol>0xE0CE) setvol = setvol+0x2020;
+  spiWriteMp3Reg(0x0b,setvol);//volume set
 }
 
-public void volumeDown(){
+public void changePlay(){
+  cPlay = !cPlay;
 }
-
 
 

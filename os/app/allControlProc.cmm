@@ -50,6 +50,16 @@
 #define ADDPLAYLISTNUM 7
 #define PLAYNUM 8
 
+#define MAINNUM 0
+#define PLAYLISTNUM 1
+#define ALBUMNUM 2
+#define ARTISTNUM 3
+#define ALLSONGNUM 4
+#define MENUNUM 5
+#define TIMERNUM 6
+#define ADDPLAYLISTNUM 7
+#define PLAYNUM 8
+
 //-----------------------------------------------------------------------------
 // スイッチの読み取り
 //-----------------------------------------------------------------------------
@@ -99,6 +109,7 @@ void prevPage(){
 }
 
 
+char[][] playListString; // ={"list1","list2","list3".null}
 int readSw() {
   int sw = ~in(0x18) & SWS;                         // スイッチを読み正論理に変換
   int swd = sw & sw0;                               // デバウンス
@@ -306,9 +317,8 @@ void menuProc(boolean first) {                                // メニューで
       if (pt==2){ //addPlaylist                                  // カーソルの位置がptの時
 	//TODO
 	addPlaylistProc(true);
-      } else if (pt==3) {
 
-      } else if (pt==4) {
+      } else if (pt==3) {
         timerProc(true);                               // アーティストに遷移
       
       }
@@ -318,7 +328,20 @@ void menuProc(boolean first) {                                // メニューで
 void playScreenProc(boolean first){
   if(first){
     showPlay();
+    scene=8;
   }
+  int sw = readSw();                              // スイッチ読み取り
+  int num = swToNum(sw); 
+
+  if(num == 1) changeLoop();
+  if(num == 4) {
+	scene=5;
+	reShow(true);
+  }
+  if(num == 5){
+	volumeChange();
+  }
+  if(num == 6) changePlay();
 }
 
 int flag,num1,num2;
@@ -338,7 +361,6 @@ void timerProc(boolean first) {
           showSleepTimer();
           astaT(pt);
           number1(num1);
-          
     } else if (num==4) { //back                           // スイッチ４
       backScene();
     } else if (num==5) {                            // スイッチ５
@@ -382,8 +404,7 @@ void addPlaylistProc(boolean first){
 
   if (num ==6) { // ファイルと対応するボタン
     int select_id = pt-2+page*5; //現在のidx(playlist番号)
-    int song_id = oldPt-2+oldPage*5; //TODO ページ数を加味
-    addPlaylist(select_id, songIds[song_id]);
+    addPlaylist(select_id, songIds[oldPt-2+oldPage*5]);
     backScene();
   }
   if(num == 4) backScene();

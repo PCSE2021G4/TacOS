@@ -168,9 +168,7 @@ public void showMenu(){
   locateXY(2,2);
   putStr("1:Add playlist");
   locateXY(2,3);
-  putStr("2:Return song");
-  locateXY(2,4);
-  putStr("3:Sleep timer");
+  putStr("2:Sleep timer");
 }
 //timerより
 public void showSleepTimer(){
