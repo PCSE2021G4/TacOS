@@ -199,7 +199,7 @@ void albumProc(boolean first) {                                  // アルバム
 
     dispList = idsToSongNames(songIds); //曲名一覧
     setSongIds(songIds); //id一覧を登録
-    allSongProc(true);//歌一覧へ
+    reShow(true);//歌一覧へ
   } else if (num==40) {                            // スイッチ４
       menuProc(true);
   }
