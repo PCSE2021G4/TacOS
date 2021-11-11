@@ -262,7 +262,7 @@ public char[][] getSongNames(){
 //id一覧から名前一覧取得
 public char[][] idsToSongNames(int[] ids){
   char[][] names = rMalloc(numFile+1);
-  for(int i=0; i<numFile; i=i+1){
+  for(int i=0; i<numFile+1; i=i+1){
     if(ids[i] == -1){
 	for(int j=i; j<numFile+1; j=j+1) names[j] = null;
 	break;
@@ -276,11 +276,14 @@ public int[] getSongIdsArtist(int id){	//曲id一覧取得(アーティストid�
 	int size = getListSize( artistIds[id]);
 	int[] songIds = iMalloc(size+1); //size数確保 これを返す
 	List songList = artistIds[id];
-	for(int i=0; i<size; i=i+1){
+	for(int i=0; i<size+1; i=i+1){
 		songIds[i] = songList.data;
 		songList = songList.next;
+		if(songList == null){
+			for(int j=i+1; j<size+1; j=j+1) songIds[j] = -1;
+			break;
+		}
 	}
-        songIds[size] = -1;
 	return songIds;
 }
 
@@ -288,22 +291,28 @@ public int[] getSongIdsAlbum(int id){	//曲id一覧取得(アルバムidから)
 	int size = getListSize( albamIds[id] );
 	int[] songIds = iMalloc(size+1); //size数確保 これを返す
 	List songList = albamIds[id];
-	for(int i=0; i<size; i=i+1){
+	for(int i=0; i<size+1; i=i+1){
 		songIds[i] = songList.data;
 		songList = songList.next;
+		if(songList == null){
+			for(int j=i+1; j<size+1; j=j+1) songIds[j] = -1;
+			break;
+		}
 	}
-        songIds[size] = -1;
 	return songIds;
 }
 public int[] getSongIdsPlaylist(int id){
 	int size = getListSize( playlistIds[id] );
 	int[] songIds = iMalloc(size+1); //size数確保 これを返す
 	List songList = playlistIds[id];
-	for(int i=0; i<size; i=i+1){
+	for(int i=0; i<size+1; i=i+1){
 		songIds[i] = songList.data;
 		songList = songList.next;
+		if(songList == null){
+			for(int j=i+1; j<size+1; j=j+1) songIds[j] = -1;
+			break;
+		}
 	}
-        songIds[size] = -1;
 	return songIds;
 }
 
