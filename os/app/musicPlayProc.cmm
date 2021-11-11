@@ -179,6 +179,10 @@ public void mp3Main() {
       send(link, OK);                       // クライアントを再開する
     } else if (l.op==START) {
       trans(_ItoA(l.prm1));                 // ファイルからデータ転送
+      if(!syncFlag){
+	send(link, OK);
+	nextPlay();
+      }
     }
   }
 }
@@ -207,14 +211,14 @@ public void nextPlay(){
   int size = 0;
   while(nextSongIds[size] != -1) size=size+1;
   if(size > nowPlayId+1){
-        stop();
+        //stop();
 	play(nowPlayId+1);
   }
 }
 
 public void prevPlay(){
   if(0 <= nowPlayId-1){
-        stop();
+        //stop();
 	play(nowPlayId-1);
   }
   
