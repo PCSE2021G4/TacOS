@@ -198,7 +198,6 @@ void playlistProc(boolean first) {                               // プレイリ
   if(num==1){ reShow(false); changePt(-1, 3);}
   if(num==5){ reShow(false); changePt(1, 3);}
   if (num==4) {                           // 6 番のスイッチが押された
-    dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num==6) { // ファイルと対応するボタン
@@ -228,7 +227,6 @@ void albumProc(boolean first) {                                  // アルバム
   if(num==1){ reShow(false); changePt(-1, getDispListSize());}
   if(num==5){ reShow(false); changePt(1, getDispListSize());}
   if(num==4) {                                   // 6 番のスイッチが押された
-    dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num ==6) { // ファイルと対応するボタン
@@ -255,13 +253,11 @@ void artistProc(boolean first) {                                 // アーティ
   if(num==1){ reShow(false); changePt(-1, getDispListSize());}
   if(num==5){ reShow(false); changePt(1, getDispListSize());}
   if(num==4) {                                   // 6 番のスイッチが押された
-    dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num==6) { // ファイルと対応するボタン
-    int select_id = pt-2+page*5; //idx
-    int fileSize = getFileSize();//曲数
-    songIds = getSongIdsArtist(select_id);//id一覧
+    //int select_id = pt-2+page*5; //idx
+    songIds = getSongIdsArtist(pt-2+page*5);//id一覧
 
     dispList = idsToSongNames(songIds); //曲名一覧
     setSongIds(songIds); //id一覧を登録
@@ -281,7 +277,6 @@ void allSongProc(boolean first) {                                // 全曲での
   if(num==1){ reShow(false); changePt(-1, getDispListSize());} //up
   if(num==5){ reShow(false); changePt(1, getDispListSize());}
   if (num==4) {                                   // 6 番のスイッチが押された
-    dbgPutStr("stop\n");
     mainProc(true);                                 // 画面を初期化
     stop();
   } else if (num==6) { // ファイルと対応するボタン
@@ -314,7 +309,7 @@ void menuProc(boolean first) {                                // メニューで
 	addPlaylistProc(true);
 
       } else if (pt==3) {
-        timerProc(true);                               // アーティストに遷移
+        sleepProc(true);                               // アーティストに遷移
       
       }
     }
@@ -342,7 +337,7 @@ void playScreenProc(boolean first){
 }
 
 int num1;
-void timerProc(boolean first) {
+void sleepProc(boolean first) {
   if(first){
     showSleepTimer();
     pt = 0;
@@ -455,7 +450,7 @@ public void shellMain() {                           // mainの処理
     else if(scene == 3) artistProc(false);
     else if(scene == 4) allSongProc(false);
     else if(scene == 5) menuProc(false);
-    else if(scene == 6) timerProc(false);
+    else if(scene == 6) sleepProc(false);
     else if(scene == 7) addPlaylistProc(false);
     else if(scene == 8) playScreenProc(false);
     sleep(10);

@@ -41,13 +41,23 @@ char[] locateCom = { '\xb0',   // page address
                      '\xff' }; // EOF
 
 
-public void number1(int i) {
-  locateXY(7,4);
+public void showLoop(boolean isLoop){
+  if(isLoop){
+    locateXY(0,0);
+    putStr("Loop");
+  }else{
+    locateXY(0,0);
+    putStr("    ");
+  }
+}
+public void showVol(int i){
+  locateXY(6,0);
+  putStr("vol:");
   putDec(i,1);
 }
 
-public void number2(int i){
-  locateXY(8,4);
+public void number1(int i) {
+  locateXY(7,4);
   putDec(i,1);
 }
 
