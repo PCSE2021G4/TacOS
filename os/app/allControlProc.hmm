@@ -45,3 +45,4 @@ void allSongProc(boolean first);
 void addPlaylistProc(boolean first);
 void reShow(boolean movePt);
 void playScreenProc(boolean first);
+void changePt(int diff, int limit);
