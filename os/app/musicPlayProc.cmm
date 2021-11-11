@@ -73,7 +73,7 @@ public boolean play(int idsIdx) {
   int songId = nextSongIds[idsIdx]; //次の曲id取り出し
   if(path != null) free(path);
   path = mp3FilesGetPath(songId); //path取得
-  printF("play:%s\n", path);
+  //printF("play:%s\n", path);
   int r = sndrec(link, START,
                   _AtoI(path), 0, 0);       // 再生開始メッセージ
   return r==OK;                             // 成功なら true を返す
@@ -104,7 +104,7 @@ void trans(char[] path) {
   }
   spiFlushMp3();                            // デコーダLSIのバッファをクリアし
   close(fd);                                // ファイルをクローズ
-  printF("trans End");
+  //printF("trans End");
 }
 
 // mp3Main は，プロセスのメインルーチンとしてカーネルに登録しておく．
