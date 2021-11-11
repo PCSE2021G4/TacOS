@@ -46,6 +46,7 @@
 #define ALLSONGNUM 4
 #define MENUNUM 5
 #define TIMERNUM 6
+#define PLAYNUM 8
 
 //-----------------------------------------------------------------------------
 // スイッチの読み取り
@@ -287,10 +288,10 @@ void allSongProc(boolean first) {                                // 全曲での
     int select_id = pt-2;
     int fileSize = getFileSize();//曲数
     play(select_id);
-
     showList("AllSong", dispList);                                 // 画面を初期化
     dbgPutStr(mp3FilesGetPath(select_id));
     dbgPutStr("\n");
+    playScreenProc(true);
   } else if (num==40) {                            // スイッチ４
       menuProc(true);
   }
@@ -336,7 +337,11 @@ void menuProc(boolean first) {                                // メニューで
     }
 }
 
-
+void playScreenProc(boolean first){
+  if(first){
+    showPlay();
+  }
+}
 
 int flag,num1,num2;
 void timerProc(boolean first) {
@@ -480,6 +485,7 @@ public void shellMain() {                           // mainの処理
     else if(scene == 4) allSongProc(false);
     else if(scene == 5) menuProc(false);
     else if(scene == 6) timerProc(false);
+    else if(scene == 8) playScreenProc(false);
     sleep(10);
   }
 }

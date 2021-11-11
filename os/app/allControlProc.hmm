@@ -42,3 +42,4 @@ void menuProc(boolean first);
 void timerProc(boolean first);
 void mainProc(boolean first);
 void allSongProc(boolean first);
+void playScreenProc(boolean first);
