@@ -28,8 +28,6 @@
 public boolean play(int idsIdx);
 public void stop();
 public void mp3Main();
-public void changePause();
-public void changeShuffle();
 public void changeLoop();
 public void changePlay();
 public void volumeChange();
