@@ -35,12 +35,11 @@ public void showList(char[] title, char[][] itemList, int page); // 項目一覧
 //public void showPlay(SongInfo songInfo);   // 再生画面の表示
 public void showMenu();                    // メニュー画面の表示
 public void showSleepTimer();              // スリープ画面の表示
-public void setChoice(int choice);         // カーソル位置の更新
-public void setSeekBar(int time);          // シークバーの更新
 public void showMain(); //タイトル
 public void showPlay(); //再生画面の表示
 
 public void number1(int i);
-public void number2(int i);
 public void asta(int y);
 public void astaT(int i);
+public void showLoop(boolean isLoop);
+public void showVol(int i);

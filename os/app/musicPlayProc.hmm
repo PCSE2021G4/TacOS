@@ -34,3 +34,5 @@ public void changeLoop();
 public void changePlay();
 public void volumeChange();
 public void setSongIds(int[] songIds); 
+public void nextPlay();
+public void prevPlay();

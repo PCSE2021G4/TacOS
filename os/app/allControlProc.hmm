@@ -34,7 +34,7 @@ struct SongInfo{
 	char[] path;
 };
 void menuProc(boolean first);
-void timerProc(boolean first);
+void sleepProc(boolean first);
 void mainProc(boolean first);
 void allSongProc(boolean first);
 void addPlaylistProc(boolean first);
