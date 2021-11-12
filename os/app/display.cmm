@@ -34,7 +34,6 @@
 #include "spi.hmm"
 #include "font.hmm"
 #include "display.hmm"
-#include "fileControl.hmm"
 char[] locateCom = { '\xb0',   // page address
                      '\x10',   // column address Hi = 0x00
                      '\x00',   // column address Lo = 0x00
