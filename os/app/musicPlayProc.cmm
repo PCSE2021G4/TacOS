@@ -78,6 +78,8 @@ public boolean play(int idsIdx) {
   isPlay = true;
 
   int songId = nextSongIds[idsIdx]; //次の曲id取り出し
+  char[] songName = mp3FilesGetName(songId+1);
+  showSongName(songName); //曲名表示
   if(path != null) free(path);
   path = mp3FilesGetPath(songId); //path取得
   int r = sndrec(link, START,

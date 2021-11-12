@@ -172,13 +172,14 @@ public void showPlay(SongInfo songInfo){
 }
 */
 //menuより
-public void showMenu(){
+public void showMenu(boolean canAddList){
   cls();
   locateXY(0,0); putStr("Menu");
   locateXY(2,2);
-  putStr("1:Add playlist");
+  putStr("1:Sleep timer");
   locateXY(2,3);
-  putStr("2:Sleep timer");
+  if(canAddList)
+   putStr("2:Add playlist");
 }
 //timerより
 public void showSleepTimer(){
@@ -191,5 +192,11 @@ public void showPlay(){
   cls();
   locateXY(4,3);
   putStr("Play now");
+}
+public void showSongName(char[] name){
+  locateXY(2,1);
+  putStr("            ");
+  locateXY(2,1);
+  putStr(name);
 }
 
