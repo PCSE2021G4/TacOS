@@ -165,8 +165,9 @@ void trans(char[] path) {
       while(cPlay){}
       if (syncFlag) break;                    //   クライアントが待っている
     }
-    spiFlushMp3();                            // デコーダLSIのバッファをクリアし
     close(fd);
+    if(syncFlag){ isLoop = false; break; }
+    spiFlushMp3();                            // デコーダLSIのバッファをクリアし
   } 
 }
 

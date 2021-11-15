@@ -330,8 +330,9 @@ void playScreenProc(boolean first){
   if(num == 3) nextPlay();
   if(num == 2) prevPlay();
   if(num == 4) {
-	scene=0;
-	reShow(true);
+	//scene=0;
+	//reShow(true);
+    	mainProc(true);                                 // 画面を初期化
 	stop();
   }
   if(num == 5){
