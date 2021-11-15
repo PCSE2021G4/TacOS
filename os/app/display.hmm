@@ -31,3 +31,16 @@ public void putCh(char c);                 // カーソル位置に１文字表�
 public void putStr(char[] str);            // カーソル位置に文字列表示
 public void putDec(int val, int width);    // カーソル位置に10進数表示
 public void cls();                         // 画面のクリア
+public void showList(char[] title, char[][] itemList, int page); // 項目一覧の表示
+//public void showPlay(SongInfo songInfo);   // 再生画面の表示
+public void showMenu(boolean canAddList);                    // メニュー画面の表示
+public void showSleepTimer();              // スリープ画面の表示
+public void showMain(); //タイトル
+public void showPlay(); //再生画面の表示
+
+public void number1(int i);
+public void asta(int y);
+public void astaT(int i);
+public void showLoop(boolean isLoop);
+public void showVol(int i);
+public void showSongName(char[] name);

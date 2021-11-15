@@ -25,7 +25,12 @@
  * 2020.08.30 : 新規作成
  *
  */
-
-public boolean play(char[] path);
+public boolean play(int idsIdx);
 public void stop();
 public void mp3Main();
+public void changeLoop();
+public void changePlay();
+public void volumeChange();
+public void setSongIds(int[] songIds); 
+public void nextPlay();
+public void prevPlay();

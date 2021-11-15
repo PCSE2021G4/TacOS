@@ -27,7 +27,19 @@
  * $Id$
  *
  */
-
+#include "structList.hmm"
 public void mp3FilesInit();               // 初期化（ファイル一覧を作る）
 public char[] mp3FilesGetName(int n);     // n 番目ファイル名を返す
 public char[] mp3FilesGetPath(int n);     // n 番目パス名を返す
+//public SongInfo getSongInfo(int id); //曲idから曲情報取得
+public void addPlaylist(int list, int id); //プレイリストに追加
+public void removePlaylist(int list, int id);	//プレイリストから削除
+public int[] getSongIdsArtist(int id);	//曲id一覧取得(アーティストidから)
+public int[] getSongIdsAlbum(int id);	//曲id一覧取得(アルバムidから)
+public int[] getSongIdsPlaylist(int id);
+public int[] getSongIds();//曲id一覧取得
+public char[][] getArtistNames();	//アーティスト名一覧を取得
+public char[][] getAlbumNames();	//アルバム名一覧を取得
+public char[][] getSongNames();
+public char[][] idsToSongNames(int[] ids);
+public int getFileSize(); //曲数

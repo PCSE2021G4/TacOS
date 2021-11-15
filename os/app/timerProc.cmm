@@ -1,0 +1,71 @@
+#include <util.hmm>
+#include <kernel.hmm>
+#include "timerProc.hmm"
+#include "musicPlayProc.hmm"
+int nowTime=0; //起動からの経過時間(s)
+int endSleepTime = 0; //スリープタイマー終了時間
+boolean isSleepTimer = false; //スリープタイマー動作中か
+int startSeekTime = 0;//seekの動作開始時間
+int nowSeekTime = 0; //seek時間
+boolean isSeekTimer = false; //seek時間動作中か
+
+//割り込み時の動作
+interrupt tmrCnt() {
+	nowTime = nowTime+1; //割り込みカウント
+	if(nowTime < 0) nowTime = 0; //オーバーフロー対策
+	
+	if(isSeekTimer){ //動作中なら
+	  nowSeekTime = nowSeekTime + 1;
+	}
+}
+
+// タイマー初期化 : 割り込みベクタとハードウェアを初期化する
+void tmrCntInit() {
+  int tick = 1000;//1000ms
+  int[] VECTOR = _ItoA(0xffe2); //割込みベクタの配列
+  VECTOR[0] = addrof(tmrCnt);                      // タイマー1 のベクタ初期化
+  out(0x0004, tick);                                // タイマー1 に周期をセット
+  out(0x0006, 0x8001);                              // タイマー1 スタート
+}
+
+//別プロセス
+public void timerProcMain(){
+        tmrCntInit();
+	for(;;){
+		sleep(1000);
+		if(isSleepTimer && endSleepTime-nowTime<=0){
+			//スリープタイマー動作終了
+			isSleepTimer = false;
+			//music stopを送信 TODO
+		 	stop();	
+		}
+	}
+}
+
+//スリープタイマー起動(s)
+public void setSleep(int time){
+	endSleepTime = nowTime + time;
+	isSleepTimer = true;
+}
+//シークバー用のタイマ起動
+public void startSeek(int time){
+	startSeekTime = nowTime;
+	nowSeekTime = 0;
+	isSeekTimer = true;	
+}
+
+public void stopSeek(){
+	isSeekTimer = false;
+}
+
+public void resumeSeek(){
+	isSeekTimer = true;
+}
+
+public int getSeekTime(){
+	return nowSeekTime;
+}
+
+public int getTime(){
+	return nowTime;
+}

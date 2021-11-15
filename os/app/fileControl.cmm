@@ -27,44 +27,266 @@
  * $Id$
  *
  */
+#include <stdlib.hmm>
 #include <fs.hmm>
 #include <util.hmm>
 #include "appUtil.hmm"
 #include "fileControl.hmm"
-
+#include "allControlProc.hmm"
 //-----------------------------------------------------------------------------
-// MP3ファイルの一覧（ただし，最大５個）
+// MP3ファイルの一覧
 //-----------------------------------------------------------------------------
 // ５つのファイル名
-char[][] fnames = array(5, 13);                     // 12345678.123
+char[][] fnames;                     // 12345678.123 曲名一覧
+SongInfo[] songInfos;
 int numFile;                                        // ファイルの個数
 
 char[] mp3Dir = "/MP3";
-char[] path = array(18);                            // /MP3/12345678.123
+char[] path;                            // /MP3/12345678.123
 
 char[] fnameToPath(char[] fname) {
+  path = cMalloc(18);
   strCpy(path, mp3Dir);
   strCat(path, "/");
   strCat(path, fname);
   return path;
 }
 
-// /MP3 ディレクトリからファイルの一覧を作る（初期化）
+char[][] artistNames;//文字列
+char[][] albumNames;
+List[] artistIds;//添え字でアーティストid, 中身はList.data or List.next
+List[] albumIds;
+List[] playlistIds;
+
+//---------
+//リスト内に既に特定の文字列と一致する要素があるか
+boolean isInArrayChar(char[][] list, char[] string){
+  int i = 0;
+  while( list[i] != null ){
+  	if ( strCmp(list[i], string) == 0 )
+	  return true;
+	i = i+1;
+  }
+  return false;
+}
+
+//配列の末端に要素を追加, 追加した場所を返す
+int addArrayChar(char[][] list, char[] item){
+  int i=0;
+  while( list[i] != null ){//末端まで探索
+    i = i+1;
+  }
+  list[i] = item;
+  return i;//追加した場所
+}
+
+//Listに追加 (原則nextに追加) //TOOD 動作確認
+List addListInt(List list, int id){
+  if (list == null){ //初期追加用
+    list = malloc(sizeof(List));
+    list.data = id;
+    list.next = null;
+    return list;
+  }
+  List nowList = list;
+  while (nowList.next != null){
+    nowList = nowList.next;
+  }
+  nowList.next = malloc(sizeof(List));
+  nowList.next.data = id;
+  nowList.next.next = null;
+  return list;
+}
+
+//Listから一致する要素を削除する(1つのみ)
+List removeListInt(List list, int id){
+  List oldList = null;
+  List nowList = list;
+  while(nowList != null){ //Listにデータあり
+    if( nowList.data == id ){//削除データと一致
+      if(oldList==null){  //1つ前にリストがない場合(先頭削除なら)
+	List tmpList = nowList.next;
+	free(nowList);
+	list = tmpList;
+	break;
+      }else{ //先頭以外の削除
+        oldList.next = nowList.next; //一つ前のnextを変更
+        free(nowList);
+        break;
+      }
+    }else{ //次を探索
+	oldList = nowList;
+	nowList = nowList.next;
+    }
+  }//Listすべて確認済み
+  return list;
+}
+
+//リストサイズ計算
+int getListSize(List list){
+  int size = 0;
+  while(list != null){
+    size = size+1;
+    list = list.next;
+  }
+  return size;
+}
+
+//airtstNames,albumNamesのサイズ取得
+int getArrayNamesSize(char[][] names){
+  int size=0;
+  for(int i=0; ; i=i+1){
+    if(names[i] == null) return i;
+  }
+  return -1;
+}
+
+//listから一致する要素のidxを返す(要素は存在するものとする)
+//アーティスト名からアーティストid取得などに使う
+int searchIdxArrayChar(char[][] list, char[] target){
+  for (int i=0; ; i=i+1){
+    if(list[i]==null) return -1;
+    if( strCmp(list[i], target) == 0)
+	    return i;
+  }
+  return -1;
+}
+
+//アルバム名取得
+public char[] readAlbumName(char[] filePath){
+  int fd = open(filePath, READ_MODE);
+  char[] buf = cMalloc(512);
+  int len;
+  char[] albumName = null;
+  while ((len=read(fd, buf, 512))>0) {   // データをファイルから読み
+	for(int i=0; i<400; i=i+1){
+		if(buf[i] == 'T' && buf[i+1]=='A' && buf[i+2]=='L' && buf[i+3]=='B'){
+			int albumSize = ord(buf[i+4+3])+2;//アルバム名のあるバイト長取得
+			albumName = cMalloc(albumSize); //配列確保
+			int idx = 0;//アルバム名配列に代入用idx
+			for(int j=i+8; j<albumSize+i+8; j=j+1){
+				if(ord(buf[j]) != 0){ //不要な箇所はスルー
+					albumName[idx] = buf[j];
+					idx = idx+1;
+				}
+			}
+			albumName[idx] = '\0';
+			break;
+		}
+	}
+       break;
+  }
+ 
+  close(fd);
+  free(buf);
+  if(albumName == null) return "unknown";
+  return albumName;
+}
+
+//アルバム名取得
+public char[] readArtistName(char[] filePath){
+  int fd = open(filePath, READ_MODE);
+  char[] buf = cMalloc(512);
+  int len;
+  char[] artistName = null;
+  while ((len=read(fd, buf, 512))>0) {   // データをファイルから読み
+        for(int i=0; i<400; i=i+1){
+                if(buf[i] == 'T' && buf[i+1]=='P' && buf[i+2]=='E' && buf[i+3]=='1'){
+                        int artistSize = ord(buf[i+4+3])+2;//アルバム名のあるバイト長取得
+                        artistName = cMalloc(artistSize); //配列確保
+                        int idx = 0;//配列に代入用idx
+                        for(int j=i+8; j<artistSize+i+8; j=j+1){
+                                if(ord(buf[j]) != 0){ //不要な箇所はスルー
+                                        artistName[idx] = buf[j];
+                                        idx = idx+1;
+                                }
+                        }
+                        artistName[idx] = '\0';
+                        break;
+                }
+        }
+       break;
+  }
+  close(fd);
+  if(artistName == null) return "unknown";
+  return artistName;
+}
+
+// /MP3 ディレクトリからファイルの一覧を作る（初期化）, fnamesに格納
 public void mp3FilesInit() {
+  int song_size = 0;
   int fd;                                           // ファイルディスクリプタ
-  if ((fd=open(mp3Dir, READ_MODE))<0) {
+  Dir dir;
+  if ((fd=open(mp3Dir, READ_MODE))<0) { //mp3 dir参照
     panic("panic:can't open MP3 Dir");
   }
-  Dir dir;
-  int i = 0;
-  while (i<5 && (dir=readDir(fd, "MP3"))!=null) {   // 最大5つファイル名を読む
-    strCpy(fnames[i], dir.name);
+
+  int i=0;
+  while ((dir=readDir(fd, "MP3"))!=null)
+    i = i+1;
+  numFile = i;
+  close(fd); //ファイル数カウント終了
+
+  //配列初期化----------------------------------------------
+  fnames = rMalloc(numFile+1); //二次元配列ファイル名最大(rMalloc:参照型
+  artistNames = rMalloc(numFile+1); //アーティスト名2次元
+  albumNames = rMalloc(numFile+1); //アルバム名2次元
+  artistIds = rMalloc(numFile+1);//アーティストidに対してどの曲idが入っているか
+  albumIds = rMalloc(numFile+1);
+  playlistIds = rMalloc(3+1);
+  for(int j=0; j<3+1; j=j+1) //playList3つ
+    playlistIds[j]= null; //List割り当て
+  for (i=0; i<numFile+1; i=i+1){ //名前とidの場所確保
+    fnames[i] = null; //2次元目 ファイル名配列
+    //artistNames[i] = cMalloc(11); //アーティスト名(最大10文字)
+    //albumNames[i] = cMalloc(11);
+    artistNames[i] = null; //アーティスト名(最大10文字)
+    albumNames[i] = null;
+    //id一覧
+    artistIds[i] = null;//malloc(sizeof(List));//不要?
+    albumIds[i] = null;//malloc(sizeof(List));
+  }
+  songInfos = rMalloc(numFile); //SongInfo配列 生成
+  
+
+  //データ読み取り-------------------
+  fd = open(mp3Dir, READ_MODE); 
+  i=0;
+  while ((dir=readDir(fd, "MP3"))!=null) {   // 拡張子mp3のファイル名を読む  
+    //fnamesを動的に生成
+    fnames[i] = cMalloc(13);
+    strCpy(fnames[i], dir.name); //fnames配列にコピー
+    SongInfo songInfo = malloc(sizeof(SongInfo));//songInfo初期化
+    songInfo.name = fnames[i];
+    songInfo.id = i;
+    //songInfo.time = TODO
+    songInfos[i] = songInfo;
+
+    //アーティスト情報など解析
+    char[] artistName = readArtistName(fnameToPath(dir.name));
+    char[] albumName = readAlbumName(fnameToPath(dir.name));
+    //初アーティスト名なら
+    if ( isInArrayChar(artistNames, artistName) == false){
+    	addArrayChar(artistNames, artistName);//アーティスト名の追加		
+    }
+    if ( isInArrayChar(albumNames, albumName) == false){
+	addArrayChar(albumNames, albumName); //アルバム名
+    }
+    
+    //アーティストidに対応した曲idを追加
+    int artist_id = searchIdxArrayChar(artistNames, artistName);
+    artistIds[artist_id] = addListInt(artistIds[artist_id], i); //ListにID追加
+    //アルバムid追加
+    int album_id = searchIdxArrayChar(albumNames, albumName);
+    albumIds[album_id] = addListInt(albumIds[album_id], i);
+
     i = i + 1;
   }
-  numFile = i;
   close(fd);
 }
 
+
+//tmp
 // n 番目ファイル名を返す（1<=n && n<=5）
 public char[] mp3FilesGetName(int n) {
   if (1<=n && n<=numFile) {
@@ -73,10 +295,101 @@ public char[] mp3FilesGetName(int n) {
   return null;
 }
 
+//tmp
 // n 番目パス名を返す（1<=n && n<=5）
 public char[] mp3FilesGetPath(int n) {
-  if (1<=n && n<=numFile) {
-    return fnameToPath(fnames[n-1]);
+  if(n >=numFile) return null;
+  return fnameToPath(fnames[n]);
+}
+
+public SongInfo getSongInfo(int id){ //曲idから曲情報取得
+  return songInfos[id];
+}
+
+public void addPlaylist(int listNum, int id){ //プレイリストに追加
+  //playlistIds[list]に追加
+  playlistIds[listNum] = addListInt(playlistIds[listNum], id);
+}
+
+public void removePlaylist(int listNum, int id){	//プレイリストから削除
+  List list = playlistIds[listNum];
+  playlistIds[listNum] = removeListInt(list, id);  
+}
+
+public char[][] getSongNames(){
+  return fnames;
+}
+//id一覧から名前一覧取得
+public char[][] idsToSongNames(int[] ids){
+  char[][] names = rMalloc(numFile+1);
+  for(int i=0; i<numFile+1; i=i+1){
+    if(ids[i] == -1){
+	for(int j=i; j<numFile+1; j=j+1) names[j] = null;
+	break;
+    }
+    names[i] = songInfos[ids[i]].name;
   }
-  return null;
+  return names;
+}
+
+public int[] getSongIdsArtist(int id){	//曲id一覧取得(アーティストidから)
+	int size = getListSize( artistIds[id]);
+	int[] songIds = iMalloc(size+1); //size数確保 これを返す
+	List songList = artistIds[id];
+	for(int i=0; i<size+1; i=i+1){
+                if(songList == null){
+                        for(int j=i; j<size+1; j=j+1) songIds[j] = -1;
+                        break;
+                }
+		songIds[i] = songList.data;
+		songList = songList.next;
+	}
+	return songIds;
+}
+
+public int[] getSongIdsAlbum(int id){	//曲id一覧取得(アルバムidから)
+	int size = getListSize( albumIds[id] );
+	int[] songIds = iMalloc(size+1); //size数確保 これを返す
+	List songList = albumIds[id];
+	for(int i=0; i<size+1; i=i+1){
+		if(songList == null){
+			for(int j=i; j<size+1; j=j+1) songIds[j] = -1;
+			break;
+		}
+		songIds[i] = songList.data;
+		songList = songList.next;
+	}
+	return songIds;
+}
+public int[] getSongIdsPlaylist(int id){
+	int size = getListSize( playlistIds[id] );
+	int[] songIds = iMalloc(size+1); //size数確保 これを返す
+	List songList = playlistIds[id];
+	for(int i=0; i<size+1; i=i+1){
+		if(songList == null){
+			for(int j=i; j<size+1; j=j+1) songIds[j] = -1;
+			break;
+		}
+		songIds[i] = songList.data;
+		songList = songList.next;
+	}
+	return songIds;
+}
+
+public int[] getSongIds(){
+   int[] ids = iMalloc(numFile+1);
+   for(int i=0; i<numFile; i=i+1) ids[i] = i;
+   ids[numFile] = -1;
+   return ids;
+}
+
+public char[][] getArtistNames(){	//アーティスト名一覧を取得
+    return artistNames;
+}
+
+public char[][] getAlbumNames(){	//アルバム名一覧を取得
+    return albumNames;
+}
+public int getFileSize(){
+    return numFile; 
 }

@@ -33,7 +33,10 @@
 #include "musicPlayProc.hmm"
 #include "spi.hmm"
 #define BUFSIZ 512                          // MP3 ファイル用のバッファ
-
+#include "allControlProc.hmm"
+#include <mm.hmm>
+#include "fileControl.hmm"
+#include "display.hmm"
 // メッセージ
 #define STOP  1                             // 再生停止要求メッセージ
 #define START 2                             // 再生開始要求メッセージ
@@ -46,6 +49,15 @@
 int link;                                   // メッセージ通信用のリンク
 boolean syncFlag = false;                   // クライアントが同期待ちである
 
+boolean isPlay = false; //再生中か
+boolean isLoop = false;
+
+boolean cPlay = false;
+int[] nextSongIds; //再生する曲一覧
+SongInfo songInfo; //再生中の曲情報
+char[] path=null;
+
+int nowPlayId = 0;
 //-----------------------------------------------------------------------------
 // クライアントプロセスが呼び出す
 //-----------------------------------------------------------------------------
@@ -53,17 +65,32 @@ boolean syncFlag = false;                   // クライアントが同期待ち
 // 音楽再生停止
 public void stop() {
   syncFlag = true;                          // データ転送プロセスをコマンド待にする
+  cPlay = false;
   sndrec(link, STOP, 0, 0, 0);              // 同期要求メッセージ
 }
 
 // 音楽再生
-public boolean play(char[] path) {
+public boolean play(int idsIdx) {
+    locateXY(3,6);
+    putStr("          ");
+  nowPlayId = idsIdx;
   syncFlag = true;                          // データ転送プロセスをコマンド待にする
+  isPlay = true;
+
+  int songId = nextSongIds[idsIdx]; //次の曲id取り出し
+  char[] songName = mp3FilesGetName(songId+1);
+  showSongName(songName); //曲名表示
+  if(path != null) free(path);
+  path = mp3FilesGetPath(songId); //path取得
   int r = sndrec(link, START,
                   _AtoI(path), 0, 0);       // 再生開始メッセージ
   return r==OK;                             // 成功なら true を返す
 }
 
+//再生する曲一覧登録
+public void setSongIds(int[] songIds){
+  nextSongIds = songIds;
+}
 //-----------------------------------------------------------------------------
 // 音楽データ転送用のプロセス
 //-----------------------------------------------------------------------------
@@ -79,12 +106,69 @@ void trans(char[] path) {
   }
   send(link, OK);                           // クライアントに成功を通知
   int len;
+  int kaisuu=0;
+  Stat stat_data = malloc(sizeof(Stat));//file info
+  stat(path, stat_data);
+  if(stat_data.lenH == 0) kaisuu = stat_data.lenL/BUFSIZ+1;
+  else{
+      if(stat_data.lenH > 256 ) kaisuu = 32760;
+      else if(stat_data.lenH > 128) kaisuu = 16380;
+      else if(stat_data.lenH > 64) kaisuu = 8190;
+      else if(stat_data.lenH > 32) kaisuu = 4090;
+      else if(stat_data.lenH > 16) kaisuu = 2040;
+      else kaisuu = 1020;
+  }
+  //while((len=read(fd, buf, BUFSIZ))>0) kaisuu=kaisuu+1;
+  close(fd);
+  fd = open(path, READ_MODE);           // ファイルをオープン)
+  int kaisuu_s=0;
+  int kaisuu_w=0;
+  int basho=2;
+  kaisuu_s = kaisuu/10;
+
   while ((len=read(fd, buf, BUFSIZ))>0) {   // データをファイルから読み
     spiWriteMp3Dat(buf, len);               //   MP3デコーダにデータを送る
     if (syncFlag) break;                    //   クライアントが待っている
+       kaisuu_w=kaisuu_w+1;
+    if(kaisuu_s < kaisuu_w){
+        kaisuu_w=0;
+        basho=basho+1;
+        if(basho < 16 )
+          locateXY(basho,6);
+        putStr("*");
+    }
+    while(cPlay){if(isPlay==false) break;}
   }
   spiFlushMp3();                            // デコーダLSIのバッファをクリアし
   close(fd);                                // ファイルをクローズ
+
+  while(isLoop){
+    kaisuu_w=0;
+    basho=2;
+    locateXY(3,6);
+    putStr("          ");
+    fd = open(path, READ_MODE);           // ファイルをオープン
+    if (fd<0) {                               // オープンできない
+      send(link, ERR);                        //   クライアントにエラーを通知
+      return;                                 //   コマンド待に戻る
+    }
+    send(link, OK);                           // クライアントに成功を通知
+    while ((len=read(fd, buf, BUFSIZ))>0) {   // データをファイルから読み
+      spiWriteMp3Dat(buf, len);               //   MP3デコーダにデータを送る
+      kaisuu_w=kaisuu_w+1;
+      if(kaisuu_s < kaisuu_w){
+        kaisuu_w=0;
+        basho=basho+1;
+        locateXY(basho,6);
+        putStr("*");
+      }
+      while(cPlay){}
+      if (syncFlag) break;                    //   クライアントが待っている
+    }
+    close(fd);
+    if(syncFlag){ isLoop = false; break; }
+    spiFlushMp3();                            // デコーダLSIのバッファをクリアし
+  } 
 }
 
 // mp3Main は，プロセスのメインルーチンとしてカーネルに登録しておく．
@@ -98,6 +182,47 @@ public void mp3Main() {
       send(link, OK);                       // クライアントを再開する
     } else if (l.op==START) {
       trans(_ItoA(l.prm1));                 // ファイルからデータ転送
+      if(!syncFlag){
+	send(link, OK);
+	nextPlay();
+      }
     }
   }
+}
+
+
+public void changeLoop(){
+  isLoop = !isLoop;
+  showLoop(isLoop);
+}
+
+public void volumeChange(){
+  int setvol=0x2020;
+  setvol=spiReadMp3Reg(0x0b); //now volume
+  if(setvol<0xE0E0) setvol = 0x0000;
+  if(setvol>0xE0CE) setvol = setvol+0x2020;
+  showVol(4-setvol/0x2020);
+
+  spiWriteMp3Reg(0x0b,setvol);//volume set
+}
+
+public void changePlay(){
+  cPlay = !cPlay;
+}
+
+public void nextPlay(){
+  int size = 0;
+  while(nextSongIds[size] != -1) size=size+1;
+  if(size > nowPlayId+1){
+        //stop();
+	play(nowPlayId+1);
+  }
+}
+
+public void prevPlay(){
+  if(0 <= nowPlayId-1){
+        //stop();
+	play(nowPlayId-1);
+  }
+  
 }

@@ -34,11 +34,53 @@
 #include "spi.hmm"
 #include "font.hmm"
 #include "display.hmm"
-
 char[] locateCom = { '\xb0',   // page address
                      '\x10',   // column address Hi = 0x00
                      '\x00',   // column address Lo = 0x00
                      '\xff' }; // EOF
+
+
+public void showLoop(boolean isLoop){
+  if(isLoop){
+    locateXY(0,0);
+    putStr("Loop");
+  }else{
+    locateXY(0,0);
+    putStr("    ");
+  }
+}
+public void showVol(int i){
+  locateXY(6,0);
+  putStr("vol:");
+  putDec(i,1);
+}
+
+public void number1(int i) {
+  locateXY(7,4);
+  putDec(i,1);
+}
+
+
+public void asta(int y) {                                  // カーソルの表示
+  locateXY(0, y);
+  putCh('*');
+}    
+
+public void astaT(int i) {
+  if(i==0) {
+    locateXY(7,3);
+    putCh('*');
+  } else if (i==1) {
+    locateXY(7,5);
+    putCh('*');
+  } else if (i==2) {
+    locateXY(8,3);
+    putCh('*');
+  } else if (i==3) {
+    locateXY(8,5);
+    putCh('*');
+  }
+}
 
 // 液晶上でカーソルを(x,y)に移動
 public void locateXY(int x, int y) {
@@ -90,3 +132,70 @@ public void cls() {
     }
   }
 }
+
+//--------add code --------
+public void showMain(){ //demo screenより
+  cls();                                            // LCDをクリアする
+  locateXY(0,0); putStr("Main Screen");
+  locateXY(2,2);
+  putStr("1:Playlist");
+  locateXY(2,3);
+  putStr("2:Album");
+  locateXY(2,4);
+  putStr("3:Artist");
+  locateXY(2,5);
+  putStr("4:All Song");
+}
+
+
+//playlist album artist allSong pageは0から
+public void showList(char[] title, char[][] itemList, int page){
+  cls();
+  locateXY(0,0); putStr(title); //title
+  int shiftIdx = page*5;
+  for (int i=1; i<=5; i=i+1) {                      // スイッチ1〜5に付いて
+    char[] names = itemList[i-1+shiftIdx];
+    if (names==null) break;
+ 
+    locateXY(2,i+1);
+    putCh(chr(ord('0')+i+shiftIdx));                         // スイッチの番号
+    putStr(":");
+    putStr(names);
+    //char[] fname = mp3FilesGetName(i);              // 対応するファイル名
+  }
+  locateXY(2,7);
+}
+/*
+public void showPlay(SongInfo songInfo){
+
+}
+*/
+//menuより
+public void showMenu(boolean canAddList){
+  cls();
+  locateXY(0,0); putStr("Menu");
+  locateXY(2,2);
+  putStr("1:Sleep timer");
+  locateXY(2,3);
+  if(canAddList)
+   putStr("2:Add playlist");
+}
+//timerより
+public void showSleepTimer(){
+  cls();
+  locateXY(9,4);
+  putStr("min");
+}
+
+public void showPlay(){
+  cls();
+  locateXY(4,3);
+  putStr("Play now");
+}
+public void showSongName(char[] name){
+  locateXY(2,1);
+  putStr("            ");
+  locateXY(2,1);
+  putStr(name);
+}
+
