@@ -165,11 +165,6 @@ public void showList(char[] title, char[][] itemList, int page){
   }
   locateXY(2,7);
 }
-/*
-public void showPlay(SongInfo songInfo){
-
-}
-*/
 //menuより
 public void showMenu(boolean canAddList){
   cls();
