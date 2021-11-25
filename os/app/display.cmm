@@ -92,7 +92,7 @@ public void locateXY(int x, int y) {
 }
 
 // カーソル位置に１文字表示
-public void putCh(char c) {
+void putCh(char c) {
   spiWriteLcdDat(font(c), 8);
 }
 
@@ -105,7 +105,7 @@ public void putStr(char[] str) {
 
 // カーソル位置に桁数を指定して右詰めで10進数を表示
 char[] decBuf = array(6);                   // 16bit int なら最大5桁
-public void putDec(int val, int width) {
+void putDec(int val, int width) {
   int v = val;
   int w = 1;
   if (v==0) {
