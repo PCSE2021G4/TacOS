@@ -54,7 +54,6 @@ boolean isLoop = false;
 
 boolean cPlay = false;
 int[] nextSongIds; //再生する曲一覧
-SongInfo songInfo; //再生中の曲情報
 char[] path=null;
 
 int nowPlayId = 0;
