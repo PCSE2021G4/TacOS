@@ -38,13 +38,12 @@
 //-----------------------------------------------------------------------------
 // ５つのファイル名
 char[][] fnames;                     // 12345678.123 曲名一覧
-SongInfo[] songInfos;
 int numFile;                                        // ファイルの個数
 
 char[] mp3Dir = "/MP3";
-char[] path;                            // /MP3/12345678.123
 
 char[] fnameToPath(char[] fname) {
+  char[] path;                            // /MP3/12345678.123
   path = cMalloc(18);
   strCpy(path, mp3Dir);
   strCat(path, "/");
@@ -246,7 +245,6 @@ public void mp3FilesInit() {
     artistIds[i] = null;//malloc(sizeof(List));//不要?
     albumIds[i] = null;//malloc(sizeof(List));
   }
-  songInfos = rMalloc(numFile); //SongInfo配列 生成
   
 
   //データ読み取り-------------------
@@ -256,11 +254,6 @@ public void mp3FilesInit() {
     //fnamesを動的に生成
     fnames[i] = cMalloc(13);
     strCpy(fnames[i], dir.name); //fnames配列にコピー
-    SongInfo songInfo = malloc(sizeof(SongInfo));//songInfo初期化
-    songInfo.name = fnames[i];
-    songInfo.id = i;
-    //songInfo.time = TODO
-    songInfos[i] = songInfo;
 
     //アーティスト情報など解析
     char[] artistName = readArtistName(fnameToPath(dir.name));
@@ -302,9 +295,6 @@ public char[] mp3FilesGetPath(int n) {
   return fnameToPath(fnames[n]);
 }
 
-public SongInfo getSongInfo(int id){ //曲idから曲情報取得
-  return songInfos[id];
-}
 
 public void addPlaylist(int listNum, int id){ //プレイリストに追加
   //playlistIds[list]に追加
@@ -327,7 +317,7 @@ public char[][] idsToSongNames(int[] ids){
 	for(int j=i; j<numFile+1; j=j+1) names[j] = null;
 	break;
     }
-    names[i] = songInfos[ids[i]].name;
+    names[i] = fnames[ids[i]];
   }
   return names;
 }
